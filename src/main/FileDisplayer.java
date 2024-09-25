@@ -1,3 +1,4 @@
+package src.main;
 
 import java.io.File;
 import java.util.Scanner;
@@ -8,7 +9,7 @@ public class FileDisplayer {
 
         try {
         	// Adapt this when you want to read and display a different file.
-            String fileName = "StudentInfo.csv";
+            String fileName = "src/main/StudentInfo.csv";
             File file=new File(fileName);
             
             // This code uses two Scanners, one which scans the file line per line
