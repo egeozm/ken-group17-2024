@@ -32,8 +32,4 @@ public class GraduatedStudentRecord {
         return GPA;
     }
 
-    public List<Double> getCourseGrades() {
-        return courseGrades;
-    }
-
 }

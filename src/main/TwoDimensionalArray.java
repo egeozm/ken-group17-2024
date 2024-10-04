@@ -10,7 +10,7 @@ public class TwoDimensionalArray {
 
     public static void main(String[] args) {
 
-        String csvFilePath = "src/main/GraduateGrades.csv";
+        String csvFilePath = "src/csvFiles/GraduateGrades.csv";
         String[][] csvData = readCsvInto2DArray(csvFilePath);
 
         if (csvData != null) {

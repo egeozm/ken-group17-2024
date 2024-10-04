@@ -6,7 +6,7 @@ import java.util.List;
 public class GraduatedCumLaudeStudents {
 
     public static void main(String[] args) {
-        String csvFilePath = "src/main/GraduateGrades.csv";
+        String csvFilePath = "src/csvFiles/GraduateGrades.csv";
         String[][] csvData = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
 
         if (csvData != null) {
