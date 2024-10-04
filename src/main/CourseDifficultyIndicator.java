@@ -6,7 +6,6 @@ import java.util.List;
 public class CourseDifficultyIndicator {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
-
         List<Course> sortedCourses = courseManager.getCourseRecords();
         sortedCourses.sort(Comparator.comparingDouble(Course::getAverageGrade));
 

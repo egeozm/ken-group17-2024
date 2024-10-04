@@ -5,42 +5,18 @@ import java.util.List;
 public class SimilarCoursesDisplayer {
 
     public static void main(String[] args) {
-
         CourseManager courseManager = CourseManager.getInstance();
-        String csvFilePath = "src/csvFiles/GraduateGrades.csv";
-        String[][] csvData = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
-
-        if (csvData == null) {
-            System.out.println("Empty CSV data.");
-            return;
-        }
-
-        int numOfStudents = csvData.length - 1;
-        int numOfCourses = csvData[0].length - 1;
-
-        double[][] grades = new double[numOfStudents][numOfCourses];
-
-        for (int i = 1; i < csvData.length; ++i) {
-            for (int j = 1; j < csvData[i].length; ++j) {
-                try {
-                    grades[i - 1][j - 1] = Double.parseDouble(csvData[i][j]); // Array with grades only and changed to a double type.
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid grade at row " + i + ", column " + j + ": " + csvData[i][j]);
-                }
-
-            }
-        }
+        List<Course> courses = courseManager.getCourseRecords();
 
         int similarCoursesCount = 0;
         double similarityHolder = 0;
         String[] courseNameHolder = new String[2];
 
-        List<Course> courses = courseManager.getCourseRecords();
-
+        int numOfCourses = courses.size();
 
         for (int i = 0; i < numOfCourses; ++i) {
-            for (int j = i + 1; j < numOfCourses; ++j) { // Only calculate upper triangle to avoid duplicates i.e. we do not to calculate (A, A) / (A, B), (B, A)
-                double similarity = pearsonCorrelation(courseGrades(grades, i), courseGrades(grades, j));
+            for (int j = i + 1; j < numOfCourses; ++j) {
+                double similarity = pearsonCorrelation(courses.get(i).getGrades(), courses.get(j).getGrades());
 
                 if (similarity > 0.7) {
                     similarCoursesCount += 1;
@@ -55,12 +31,11 @@ public class SimilarCoursesDisplayer {
             }
         }
         System.out.println("Number of similar courses: " + similarCoursesCount);
-        System.out.printf("The most similar courses based on Pearson correlation are: %s and %s with correlation: %.3f%n", courseNameHolder[0], courseNameHolder[1], similarityHolder);
-
-
+        System.out.printf("The most similar courses based on Pearson correlation are: %s and %s with correlation: %.3f%n",
+                courseNameHolder[0], courseNameHolder[1], similarityHolder);
     }
 
-    public static double pearsonCorrelation(double[] x, double[] y) {
+    public static double pearsonCorrelation(List<Double> x, List<Double> y) {
 /*
     While other similarity measures, such as cosine similarity or Euclidean distance, could also be used,
     Pearson correlation has specific advantages in the context of comparing course grades:
@@ -82,15 +57,22 @@ public class SimilarCoursesDisplayer {
     -1 indicates a perfect negative linear relationship
 */
 
-        int n = x.length;
+        int n = x.size();
+        if (n != y.size() || n == 0) {
+            return 0; // Return 0 if the lists are not of equal size or empty
+        }
+
         double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
 
         for (int i = 0; i < n; i++) {
-            sumX += x[i];
-            sumY += y[i];
-            sumXY += x[i] * y[i];
-            sumX2 += x[i] * x[i];
-            sumY2 += y[i] * y[i];
+            double xi = x.get(i);
+            double yi = y.get(i);
+
+            sumX += xi;
+            sumY += yi;
+            sumXY += xi * yi;
+            sumX2 += xi * xi;
+            sumY2 += yi * yi;
         }
 
         double numerator = n * sumXY - sumX * sumY;
@@ -99,11 +81,4 @@ public class SimilarCoursesDisplayer {
         return denominator != 0 ? numerator / denominator : 0; // Handle division by zero
     }
 
-    public static double[] courseGrades(double[][] grades, int courseIndex) {
-        double[] courseGrades = new double[grades.length]; //Create an array for grades
-        for (int i = 0; i < grades.length; ++i) {
-            courseGrades[i] = grades[i][courseIndex]; //Go through every grade and add it to array
-        }
-        return courseGrades;
-    }
 }

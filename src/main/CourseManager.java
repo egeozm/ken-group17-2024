@@ -26,50 +26,38 @@ public class CourseManager {
         String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/GraduateGrades.csv");
 
         if (dataSet != null && dataSet.length > 0) {
-            // Extract course names and calculate average and standard deviation
-            for (int i = 1; i < dataSet[0].length; i++) { // Start from index 1 to skip "StudentID"
+            for (int i = 1; i < dataSet[0].length; i++) { // Skip the "StudentID" column
                 String courseName = dataSet[0][i];
-                double averageGrade = calculateAverageGrade(dataSet, i);
-                double standardDeviation = calculateStandardDeviation(dataSet, i, averageGrade);
-                Course course = new Course(courseName, averageGrade, standardDeviation);
-                courses.add(course);
+                List<Double> grades = new ArrayList<>();
+                double sum = 0;
+                int count = 0;
+
+                for (int j = 1; j < dataSet.length; j++) { // Skip the header row
+                    try {
+                        double grade = Double.parseDouble(dataSet[j][i]);
+                        grades.add(grade);
+                        sum += grade; // for calculating average grade
+                        count++; // for total
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid grade at row " + j + ", column " + i);
+                    }
+                }
+
+                double averageGrade = (count > 0) ? (sum / count) : 0;
+                double standardDeviation = calculateStandardDeviation(grades, averageGrade);
+                courses.add(new Course(courseName, averageGrade, standardDeviation, grades));
             }
         }
     }
 
-    // Method to calculate the average grade for a specific course column
-    private double calculateAverageGrade(String[][] dataSet, int columnIndex) {
-        double sum = 0;
-        int count = 0;
-
-        for (int i = 1; i < dataSet.length; i++) { // Start from 1 to skip header
-            try {
-                sum += Double.parseDouble(dataSet[i][columnIndex]);
-                count++;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid grade at row " + i + ", column " + columnIndex + ": " + dataSet[i][columnIndex]);
-            }
-        }
-
-        return (count > 0) ? (sum / count) : 0.0;
-    }
 
     // Method to calculate the standard deviation for a specific course column
-    private double calculateStandardDeviation(String[][] dataSet, int columnIndex, double mean) {
+    private double calculateStandardDeviation(List<Double> grades, double mean) {
         double sum = 0;
-        int count = 0;
-
-        for (int i = 1; i < dataSet.length; i++) { // Start from 1 to skip header
-            try {
-                double grade = Double.parseDouble(dataSet[i][columnIndex]);
-                sum += Math.pow(grade - mean, 2);
-                count++;
-            } catch (NumberFormatException ignored) {
-                // Ignore invalid grades
-            }
+        for (double grade : grades) {
+            sum += Math.pow(grade - mean, 2);
         }
-
-        return (count > 0) ? Math.sqrt(sum / count) : 0.0;
+        return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
     }
 
 
@@ -77,12 +65,4 @@ public class CourseManager {
         return courses;
     }
 
-    public Course getCourseRecordByName(String name) {
-        for (Course record : courses) {
-            if (record.getName().equals(name)) {
-                return record;
-            }
-        }
-        return null;
-    }
 }
