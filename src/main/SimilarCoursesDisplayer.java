@@ -1,8 +1,12 @@
 package src.main;
 
+import java.util.List;
+
 public class SimilarCoursesDisplayer {
 
     public static void main(String[] args) {
+
+        CourseManager courseManager = CourseManager.getInstance();
         String csvFilePath = "src/csvFiles/GraduateGrades.csv";
         String[][] csvData = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
 
@@ -31,19 +35,22 @@ public class SimilarCoursesDisplayer {
         double similarityHolder = 0;
         String[] courseNameHolder = new String[2];
 
+        List<Course> courses = courseManager.getCourseRecords();
+
+
         for (int i = 0; i < numOfCourses; ++i) {
             for (int j = i + 1; j < numOfCourses; ++j) { // Only calculate upper triangle to avoid duplicates i.e. we do not to calculate (A, A) / (A, B), (B, A)
                 double similarity = pearsonCorrelation(courseGrades(grades, i), courseGrades(grades, j));
 
                 if (similarity > 0.7) {
                     similarCoursesCount += 1;
-                    System.out.printf("Similarity between %s and %s: %.3f%n", csvData[0][i + 1], csvData[0][j + 1], similarity);
+                    System.out.printf("Similarity between %s and %s: %.3f%n", courses.get(i).getName(), courses.get(j).getName(), similarity);
                 }
 
                 if (similarity > similarityHolder) {
                     similarityHolder = similarity;
-                    courseNameHolder[0] = csvData[0][i + 1];
-                    courseNameHolder[1] = csvData[0][j + 1];
+                    courseNameHolder[0] = courses.get(i).getName();
+                    courseNameHolder[1] = courses.get(j).getName();
                 }
             }
         }

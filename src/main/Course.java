@@ -1,11 +1,11 @@
 package src.main;
 
-public class CourseRecord {
+public class Course {
     private String name;
     private double averageGrade;
     private double standardDeviation;
 
-    public CourseRecord(String name, double averageGrade, double standardDeviation) {
+    public Course(String name, double averageGrade, double standardDeviation) {
         this.name = name;
         this.averageGrade = averageGrade;
         this.standardDeviation = standardDeviation;
