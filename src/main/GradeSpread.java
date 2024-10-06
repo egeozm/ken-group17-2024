@@ -12,9 +12,10 @@ public class GradeSpread {
         // Average and standard deviation
         double averageGrade = calculateAverage(grades);
         double standardDeviation = calculateStandardDeviation(grades, averageGrade);
+        double mostCommonGrade = calculateAverage(grades);
 
         // Course instance
-        Course courseInstance = new Course(name, averageGrade, standardDeviation, grades);
+        Course courseInstance = new Course(name, averageGrade, standardDeviation, grades, mostCommonGrade);
 
         // Access the values
         double average = courseInstance.getAverageGrade();

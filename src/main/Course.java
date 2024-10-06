@@ -7,13 +7,16 @@ public class Course {
     private final double averageGrade;
     private final double standardDeviation;
     private final List<Double> grades; // Add a list to store individual grades
+    private final double mostCommonGrade;
 
 
-    public Course(String name, double averageGrade, double standardDeviation, List<Double> grades) {
+
+    public Course(String name, double averageGrade, double standardDeviation, List<Double> grades, double mostCommonGrade) {
         this.name = name;
         this.averageGrade = averageGrade;
         this.standardDeviation = standardDeviation;
         this.grades = grades;
+        this.mostCommonGrade = mostCommonGrade;
     }
 
     public String getName() {
@@ -30,6 +33,10 @@ public class Course {
 
     public List<Double> getGrades() {
         return grades;
+    }
+
+    public double getMostCommonGrade() {
+        return mostCommonGrade;
     }
 
 }

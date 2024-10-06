@@ -20,8 +20,8 @@ public class CourseDifficultyIndicator {
         System.out.println("\nSorted list of courses: (Hardest to easiest)\n");
         int count = 1;
         for (Course course : sortedCourses) {
-            System.out.printf("Course %d: %s, with average: %.3f, Std Dev: %.3f\n",
-                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation());
+            System.out.printf("Course %d: %s, with average: %.3f, Std Dev: %.3f, most common grade: %.3f\n",
+                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation(),course.getMostCommonGrade());
             count++;
         }
     }

@@ -45,7 +45,9 @@ public class CourseManager {
 
                 double averageGrade = (count > 0) ? (sum / count) : 0;
                 double standardDeviation = calculateStandardDeviation(grades, averageGrade);
-                courses.add(new Course(courseName, averageGrade, standardDeviation, grades));
+                double mostCommonGrade = calculateMostCommonGrade(grades);
+
+                courses.add(new Course(courseName, averageGrade, standardDeviation, grades, mostCommonGrade));
             }
         }
     }
@@ -60,6 +62,44 @@ public class CourseManager {
         return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
     }
 
+
+    public static double calculateMostCommonGrade(List<Double> grades){
+        double mostCommonGradeFrequency = 0;
+        int six = 0;
+        int seven = 0;
+        int eight = 0;
+        int nine = 0;
+        int ten = 0;
+
+        for(double grade:grades){
+            if (grade == 6) {
+                six ++;
+            }else if (grade == 7) {
+                seven ++;
+            }else if(grade == 8){
+                eight ++;
+            }else if(grade == 9){
+                nine ++;
+            }else if(grade == 10){
+                ten++;
+            }
+        }
+
+        mostCommonGradeFrequency = Math.max(six,Math.max(seven, Math.max(eight, Math.max(nine, ten))));
+        if (mostCommonGradeFrequency == six) {
+            return 6.0;
+        }else if(mostCommonGradeFrequency == seven) {
+            return 7.0;
+        }else if (mostCommonGradeFrequency == eight) {
+            return 8.0;
+        }else if (mostCommonGradeFrequency == nine) {
+            return 9.0;
+        }else if (mostCommonGradeFrequency == ten) {
+            return 10.0;
+        }else{
+            return 0;
+        }
+    }
 
     public List<Course> getCourseRecords() {
         return courses;
