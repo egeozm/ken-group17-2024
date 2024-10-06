@@ -37,7 +37,7 @@ public class CourseManager {
                         double grade = Double.parseDouble(dataSet[j][i]);
                         grades.add(grade);
                         sum += grade; // for calculating average grade
-                        count++; // for total
+                        count++;
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid grade at row " + j + ", column " + i);
                     }
