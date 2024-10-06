@@ -7,10 +7,9 @@ public class GradeSpread {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         List<Course> courses = courseManager.getCourseRecords();
-        
-        for (int i = 0; i < courses.size(); i++) {
-        double averageGrade = courses.get(i).getAverageGrade();
-        System.out.println(courses.get(i).getName() + " " + courses.get(i).getAverageGrade());
+        System.out.println("Grade Spread for Each Course:\n");
+        for (Course course : courses) {
+            System.out.println(course.getName() + ": " + course.getMostCommonGrade());
         }
 
 }

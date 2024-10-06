@@ -6,7 +6,7 @@ public class Course {
     private final String name;
     private final double averageGrade;
     private final double standardDeviation;
-    private final List<Double> grades; // Add a list to store individual grades
+    private final List<Double> grades; // Add a list to store individual grades for each course
     private final double mostCommonGrade;
 
 

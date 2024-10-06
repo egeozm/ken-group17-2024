@@ -62,44 +62,33 @@ public class CourseManager {
         return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
     }
 
-    // Method to calculate the most common grade for a specific course column
-    public static double calculateMostCommonGrade(List<Double> grades){
-        double mostCommonGradeFrequency = 0;
-        int six = 0;
-        int seven = 0;
-        int eight = 0;
-        int nine = 0;
-        int ten = 0;
+    public static double calculateMostCommonGrade(List<Double> grades) {
+        if (grades.isEmpty()) {
+            return 0;
+        }
 
-        for(double grade:grades){
-            if (grade == 6) {
-                six ++;
-            }else if (grade == 7) {
-                seven ++;
-            }else if(grade == 8){
-                eight ++;
-            }else if(grade == 9){
-                nine ++;
-            }else if(grade == 10){
-                ten++;
+        int[] frequency = new int[11];
+
+        for (double grade : grades) {
+            int index = (int) grade;
+            if (index >= 0 && index <= 10) {
+                frequency[index]++;
             }
         }
 
-        mostCommonGradeFrequency = Math.max(six,Math.max(seven, Math.max(eight, Math.max(nine, ten))));
-        if (mostCommonGradeFrequency == six) {
-            return 6.0;
-        }else if(mostCommonGradeFrequency == seven) {
-            return 7.0;
-        }else if (mostCommonGradeFrequency == eight) {
-            return 8.0;
-        }else if (mostCommonGradeFrequency == nine) {
-            return 9.0;
-        }else if (mostCommonGradeFrequency == ten) {
-            return 10.0;
-        }else{
-            return 0;
+        int mostCommonGrade = 0;
+        int maxFrequency = 0;
+
+        for (int i = 0; i < frequency.length; i++) {
+            if (frequency[i] > maxFrequency) {
+                maxFrequency = frequency[i];
+                mostCommonGrade = i;
+            }
         }
+
+        return mostCommonGrade;
     }
+
 
     public List<Course> getCourseRecords() {
         return courses;

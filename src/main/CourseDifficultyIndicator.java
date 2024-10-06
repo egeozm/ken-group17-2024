@@ -7,7 +7,9 @@ public class CourseDifficultyIndicator {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         List<Course> sortedCourses = courseManager.getCourseRecords();
+        // Changing their position in the list not creating anything new.
         sortedCourses.sort(Comparator.comparingDouble(Course::getAverageGrade));
+        // we did not use std dev. because there are no 2 courses that have the same average grade.
 
         Course hardestCourse = sortedCourses.get(0);
         Course easiestCourse = sortedCourses.get(sortedCourses.size() - 1);
