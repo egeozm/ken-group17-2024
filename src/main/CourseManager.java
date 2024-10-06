@@ -62,7 +62,7 @@ public class CourseManager {
         return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
     }
 
-
+    // Method to calculate the most common grade for a specific course column
     public static double calculateMostCommonGrade(List<Double> grades){
         double mostCommonGradeFrequency = 0;
         int six = 0;
