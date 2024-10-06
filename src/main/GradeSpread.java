@@ -1,28 +1,46 @@
 package src.main;
 
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GradeSpread {
 
     public static void main(String[] args) {
-        String name = "Course Name";
-        List<Double> grades = Arrays.asList(85.0, 90.0, 78.0, 92.0, 88.0);
-        
-        // Average and standard deviation
+        String filePath = "src/csvFiles/GraduateGrades.csv";
+        List<Double> grades = readGradesFromFile(filePath);
+
+        if (grades.isEmpty()) {
+            System.out.println("No grades found in the file.");
+            return;
+        }
+
         double averageGrade = calculateAverage(grades);
         double standardDeviation = calculateStandardDeviation(grades, averageGrade);
 
-        // Course instance
-        Course courseInstance = new Course(name, averageGrade, standardDeviation, grades);
+        Course courseInstance = new Course("Course Name", averageGrade, standardDeviation, grades);
 
-        // Access the values
-        double average = courseInstance.getAverageGrade();
-        double stdDev = courseInstance.getStandardDeviation();
+        System.out.println("Average Grade: " + courseInstance.getAverageGrade());
+        System.out.println("Standard Deviation: " + courseInstance.getStandardDeviation());
+        System.out.println("Grade Spread: " + courseInstance.getStandardDeviation());
+    }
 
-        System.out.println("Average Grade: " + average);
-        System.out.println("Standard Deviation: " + stdDev);
-        System.out.println("Grade Spread: " + stdDev);
+    private static List<Double> readGradesFromFile(String filePath) {
+        List<Double> grades = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] gradeStrings = line.split(",");
+                for (String gradeString : gradeStrings) {
+                    grades.add(Double.parseDouble(gradeString.trim()));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return grades;
     }
 
     private static double calculateAverage(List<Double> grades) {
