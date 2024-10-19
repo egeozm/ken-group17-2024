@@ -33,8 +33,9 @@ public class GradeSpread {
 
         // The highest and the lowest grade for each row.
         for(int i = 0; i < GraduateGrades.length(); i++){
+                int lowestGrades;
+                int highestGrades;
             
         }
-}
 }
 }
