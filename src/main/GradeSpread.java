@@ -1,9 +1,11 @@
 package src.main;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
 
 public class GradeSpread {
 
@@ -16,27 +18,45 @@ public class GradeSpread {
         String csvSplitBy = ",";
         
         // Average grade for every course.
-        for(int i = 0; i < courses.size(); i++) {
-        double averageGrade = courses.get(i).getAverageGrade();
-        System.out.println("Avg Grd - " + courses.get(i).getName() + " " + courses.get(i).getAverageGrade());
+        for(Course course : courses){
+            double averageGrade = course.getAverageGrade();
+            System.out.println("Avg grd - " + course.getName() + " " + averageGrade);
         }
 
         System.out.println(" ");
 
         // Standard deviation for every course.
-        for(int i = 0; i < courses.size(); i++) {
-            double standardDeviation = courses.get(i).getStandardDeviation();
-            System.out.println("Std Dev - " + courses.get(i).getName() + " " + courses.get(i).getStandardDeviation());
-            }
-
-        //19354 graduated students.
+        for(Course course : courses){
+            double standardDeviation = course.getStandardDeviation();
+            System.out.println("Std dev - " + course.getName() + " " + standardDeviation);
+        }
 
         // Grade spread.
-        for(int i = 0; i < courses.size(); i++){}
-        int maxGrade = Math.max(courses.get(i).getMax());
-        int minGrade = Math.min(courses.get(i).getMin());
-        int gradeSpread = maxGrade - minGrade;
-        System.out.println("Grade spread: " + courses.get(i).getName() + " - " + gradeSpread);
-            
+        for(Course course : courses){
+            List<Double> grades = new ArrayList<>();
+            int courseIndex = courses.indexOf(course) + 1;    // +1 for the Student ID column
+            try(BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+                // Skip the header row.
+                br.readLine();
+                while((line = br.readLine()) != null){
+                    String[] gradeData = line.split(csvSplitBy);
+                
+                    if(courseIndex < gradeData.length){
+                        grades.add(Double.parseDouble(gradeData[courseIndex]));
+                    }
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
+            if(!grades.isEmpty()){
+                double maxGrade = Collections.max(grades);
+                double minGrade = Collections.min(grades);
+                double gradeSpread = maxGrade - minGrade;
+                System.out.println("Grade spread - " + course.getName() + " " + gradeSpread);
+            } else{
+                System.out.println("No grades found for " + course.getName());
+            }
         }
+    }
 }
