@@ -18,7 +18,7 @@ public class GradeSpread {
         // Average grade for every course.
         for(int i = 0; i < courses.size(); i++) {
         double averageGrade = courses.get(i).getAverageGrade();
-        System.out.println("(!) Avg Grd - " + courses.get(i).getName() + " " + courses.get(i).getAverageGrade());
+        System.out.println("Avg Grd - " + courses.get(i).getName() + " " + courses.get(i).getAverageGrade());
         }
 
         System.out.println(" ");
@@ -26,16 +26,17 @@ public class GradeSpread {
         // Standard deviation for every course.
         for(int i = 0; i < courses.size(); i++) {
             double standardDeviation = courses.get(i).getStandardDeviation();
-            System.out.println("(!) Std Dev - " + courses.get(i).getName() + " " + courses.get(i).getStandardDeviation());
+            System.out.println("Std Dev - " + courses.get(i).getName() + " " + courses.get(i).getStandardDeviation());
             }
 
         //19354 graduated students.
 
-        // The highest and the lowest grade for each row.
-        for(int i = 0; i < GraduateGrades.length(); i++){
-                int lowestGrades;
-                int highestGrades;
+        // Grade spread.
+        for(int i = 0; i < courses.size(); i++){}
+        int maxGrade = Math.max(courses.get(i).getMax());
+        int minGrade = Math.min(courses.get(i).getMin());
+        int gradeSpread = maxGrade - minGrade;
+        System.out.println("Grade spread: " + courses.get(i).getName() + " - " + gradeSpread);
             
         }
-}
 }
