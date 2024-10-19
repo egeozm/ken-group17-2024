@@ -45,7 +45,9 @@ public class CourseManager {
 
                 double averageGrade = (count > 0) ? (sum / count) : 0;
                 double standardDeviation = calculateStandardDeviation(grades, averageGrade);
-                courses.add(new Course(courseName, averageGrade, standardDeviation, grades));
+                double mostCommonGrade = calculateMostCommonGrade(grades);
+
+                courses.add(new Course(courseName, averageGrade, standardDeviation, grades, mostCommonGrade));
             }
         }
     }
@@ -58,6 +60,33 @@ public class CourseManager {
             sum += Math.pow(grade - mean, 2);
         }
         return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
+    }
+
+    public static double calculateMostCommonGrade(List<Double> grades) {
+        if (grades.isEmpty()) {
+            return 0;
+        }
+
+        int[] frequency = new int[11];
+
+        for (double grade : grades) {
+            int index = (int) grade;
+            if (index >= 0 && index <= 10) {
+                frequency[index]++;
+            }
+        }
+
+        int mostCommonGrade = 0;
+        int maxFrequency = 0;
+
+        for (int i = 0; i < frequency.length; i++) {
+            if (frequency[i] > maxFrequency) {
+                maxFrequency = frequency[i];
+                mostCommonGrade = i;
+            }
+        }
+
+        return mostCommonGrade;
     }
 
 
