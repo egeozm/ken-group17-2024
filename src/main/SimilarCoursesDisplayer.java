@@ -6,6 +6,7 @@ public class SimilarCoursesDisplayer {
 
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadGraduateGrades();
         List<Course> courses = courseManager.getCourseRecords();
 
         int similarCoursesCount = 0;

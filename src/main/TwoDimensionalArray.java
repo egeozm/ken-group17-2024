@@ -8,19 +8,6 @@ import java.util.List;
 
 public class TwoDimensionalArray {
 
-    public static void main(String[] args) {
-
-        String csvFilePath = "src/csvFiles/GraduateGrades.csv";
-        String[][] csvData = readCsvInto2DArray(csvFilePath);
-
-        if (csvData != null) {
-            for (int i = 0; i < 2; i++) {
-                System.out.println(String.join(",", csvData[i]));
-            }
-        }
-
-    }
-
     public static String[][] readCsvInto2DArray(String csvFile) {
 
         List<String[]> recordList = new ArrayList<>();

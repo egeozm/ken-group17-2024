@@ -1,48 +1,51 @@
 package src.main;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 public class GraduatedCumLaudeStudents {
 
     public static void main(String[] args) {
-        String csvFilePath = "src/csvFiles/GraduateGrades.csv";
-        String[][] csvData = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
+        // Use CourseManager to load data
+        CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadGraduateGrades();  // Load graduate grades from CSV
 
-        if (csvData != null) {
-            List<GraduatedStudentRecord> studentRecords = new ArrayList<>();
+        List<Course> courses = courseManager.getCourseRecords();
+        List<GraduatedStudentRecord> studentRecords = new ArrayList<>();
 
-            for (int i = 1; i < csvData.length; i++) {
-                try {
-                    int studentID = Integer.parseInt(csvData[i][0]);
-                    List<Double> courseGrades = new ArrayList<>();
+        // Assuming the first column of each course contains the student ID
+        int numStudents = courses.get(0).getGrades().size(); // Get number of students based on the first course's grades
 
-                    for (int j = 1; j < csvData[i].length; j++) {
-                        try {
-                            courseGrades.add(Double.parseDouble(csvData[i][j]));
-                        } catch (NumberFormatException e) {
-                            System.out.println("Error parsing grade at row " + i + ", column " + j);
-                        }
-                    }
+        // Iterate through the students (rows)
+        for (int i = 0; i < numStudents; i++) {
+            int studentID = (int) courses.get(0).getGrades().get(i).doubleValue();  // Assuming student IDs are stored as doubles
 
-                    studentRecords.add(new GraduatedStudentRecord(studentID, courseGrades));
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing student ID at row " + i);
+            List<Double> studentGrades = new ArrayList<>();
+            for (Course course : courses) {
+                List<Double> grades = course.getGrades();
+                // Skip non-graded values
+                if (i < grades.size()) {
+                    studentGrades.add(grades.get(i));
                 }
             }
 
-            int cumLaudeNumber = 0;
-            int totalNumberStudent = studentRecords.size();
-            for (GraduatedStudentRecord record : studentRecords) {
-                if (record.getGPA() >= 8.25) {
-                    cumLaudeNumber++;
-                    System.out.printf("Student ID: %d, GPA: %.2f%n", record.getStudentID(), record.getGPA());
-                }
-            }
-            System.out.println("Number of students that cum-laude: " + cumLaudeNumber);
-            System.out.println("Total number of students: " + totalNumberStudent);
-            System.out.printf("Percentage of a student cum-laude: %.2f%%%n", ((double) cumLaudeNumber / totalNumberStudent) * 100);
-
+            // Add each student record
+            studentRecords.add(new GraduatedStudentRecord(studentID, studentGrades));
         }
+
+        // Count students who graduated cum laude (GPA >= 8.25)
+        int cumLaudeNumber = 0;
+        int totalNumberStudent = studentRecords.size();
+        for (GraduatedStudentRecord record : studentRecords) {
+            if (record.getGPA() >= 8.25) {
+                cumLaudeNumber++;
+                System.out.printf("Student ID: %d, GPA: %.2f%n", record.getStudentID(), record.getGPA());
+            }
+        }
+
+        // Output summary statistics
+        System.out.println("Number of students that cum-laude: " + cumLaudeNumber);
+        System.out.println("Total number of students: " + totalNumberStudent);
+        System.out.printf("Percentage of students cum-laude: %.2f%%%n", ((double) cumLaudeNumber / totalNumberStudent) * 100);
     }
 }

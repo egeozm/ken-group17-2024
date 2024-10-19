@@ -9,7 +9,6 @@ public class CourseManager {
 
     private CourseManager() {
         courses = new ArrayList<>();
-        loadCoursesFromCsv();
     }
 
     // Singleton method to get the single instance of CourseManager
@@ -20,25 +19,27 @@ public class CourseManager {
         return instance;
     }
 
-    // Method to load courses and create CourseRecord objects
-    private void loadCoursesFromCsv() {
-        // Assuming you use this method to load your CSV file
-        String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
+    // Method to load courses from a specific CSV file
+    public void loadCoursesFromCsv(String csvFilePath) {
+        // Clear the existing courses if switching between datasets
+        courses.clear();
+
+        String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
 
         if (dataSet != null && dataSet.length > 0) {
             for (int i = 1; i < dataSet[0].length; i++) { // Skip the "StudentID" column
-                String courseName = dataSet[0][i];
+                String courseName = dataSet[0][i].trim();
                 List<Double> grades = new ArrayList<>();
                 double sum = 0;
                 int count = 0;
 
                 for (int j = 1; j < dataSet.length; j++) { // Skip the header row
                     String gradeStr = dataSet[j][i].trim(); // Trim to remove any extra spaces
-                if (gradeStr.equalsIgnoreCase("NG") || gradeStr.isEmpty()) {
-                    continue;
-                }
+                    if (gradeStr.equalsIgnoreCase("NG") || gradeStr.isEmpty()) {
+                        continue;
+                    }
                     try {
-                        double grade = Double.parseDouble(dataSet[j][i]);
+                        double grade = Double.parseDouble(gradeStr);
                         grades.add(grade);
                         sum += grade; // for calculating average grade
                         count++;
@@ -56,6 +57,15 @@ public class CourseManager {
         }
     }
 
+    // Switch to load Current Grades
+    public void loadCurrentGrades() {
+        loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv");
+    }
+
+    // Switch to load Graduate Grades
+    public void loadGraduateGrades() {
+        loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv");
+    }
 
     // Method to calculate the standard deviation for a specific course column
     private double calculateStandardDeviation(List<Double> grades, double mean) {
@@ -71,7 +81,7 @@ public class CourseManager {
             return 0;
         }
 
-        int[] frequency = new int[11];
+        int[] frequency = new int[11]; // Assuming the grades are between 0-10
 
         for (double grade : grades) {
             int index = (int) grade;
@@ -93,9 +103,8 @@ public class CourseManager {
         return mostCommonGrade;
     }
 
-
+    // Getter for course records
     public List<Course> getCourseRecords() {
         return courses;
     }
-
 }
