@@ -23,7 +23,7 @@ public class CourseManager {
     // Method to load courses and create CourseRecord objects
     private void loadCoursesFromCsv() {
         // Assuming you use this method to load your CSV file
-        String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/GraduateGrades.csv");
+        String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
 
         if (dataSet != null && dataSet.length > 0) {
             for (int i = 1; i < dataSet[0].length; i++) { // Skip the "StudentID" column

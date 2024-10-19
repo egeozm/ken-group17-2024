@@ -13,8 +13,12 @@ public class CourseDifficultyIndicator {
 
         Course hardestCourse = sortedCourses.get(0);
         Course easiestCourse = sortedCourses.get(sortedCourses.size() - 1);
+
+        // Display hardest course.
         System.out.printf("The hardest course is: %s, with average: %.3f, Std Dev: %.3f\n",
                 hardestCourse.getName(), hardestCourse.getAverageGrade(), hardestCourse.getStandardDeviation());
+
+        // Display easiest course.
         System.out.printf("The easiest course is: %s, with average: %.3f, Std Dev: %.3f\n",
                 easiestCourse.getName(), easiestCourse.getAverageGrade(), easiestCourse.getStandardDeviation());
 
@@ -23,7 +27,7 @@ public class CourseDifficultyIndicator {
         int count = 1;
         for (Course course : sortedCourses) {
             System.out.printf("Course %d: %s, with average: %.3f, Std Dev: %.3f, most common grade: %.3f\n",
-                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation(),course.getMostCommonGrade());
+                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation(), course.getMostCommonGrade());
             count++;
         }
     }

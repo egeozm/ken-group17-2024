@@ -10,7 +10,6 @@ public class Course {
     private final double mostCommonGrade;
 
 
-
     public Course(String name, double averageGrade, double standardDeviation, List<Double> grades, double mostCommonGrade) {
         this.name = name;
         this.averageGrade = averageGrade;
@@ -38,6 +37,35 @@ public class Course {
     public double getMostCommonGrade() {
         return mostCommonGrade;
     }
+
+    public double getLowestGrade(List<Double> grades) {
+        if (grades.isEmpty()) {
+            return 0.0; // Return 0 or any default value for empty lists.
+        }
+
+        double minGrade = Double.MAX_VALUE;
+        for (double grade : grades) {
+            if (grade < minGrade) {
+                minGrade = grade;
+            }
+        }
+        return minGrade;
+    }
+
+    public double getHighestGrade(List<Double> grades) {
+        if (grades.isEmpty()) {
+            return 0.0; // Return 0 or any default value for empty lists.
+        }
+
+        double maxGrade = Double.MIN_VALUE;
+        for (double grade : grades) {
+            if (grade > maxGrade) {
+                maxGrade = grade;
+            }
+        }
+        return maxGrade;
+    }
+
 
 }
 
