@@ -33,6 +33,10 @@ public class CourseManager {
                 int count = 0;
 
                 for (int j = 1; j < dataSet.length; j++) { // Skip the header row
+                    String gradeStr = dataSet[j][i].trim(); // Trim to remove any extra spaces
+                if (gradeStr.equalsIgnoreCase("NG") || gradeStr.isEmpty()) {
+                    continue;
+                }
                     try {
                         double grade = Double.parseDouble(dataSet[j][i]);
                         grades.add(grade);
