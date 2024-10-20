@@ -17,7 +17,7 @@ public class GradeSpread {
         String line;
         String csvSplitBy = ",";
         
-        // Read the header row to get the course names
+        // Read the header row to get the course names.
         List<String> courseNames = new ArrayList<>();
         try(BufferedReader br = new BufferedReader(new FileReader(csvFile))){
             if((line = br.readLine()) != null){
@@ -79,7 +79,7 @@ public class GradeSpread {
                 List<Double> middleHalf = grades.subList(quarterSize, size - quarterSize);
                 double meanMiddleHalf = calculateMean(middleHalf);
 
-                System.out.println("Course: " + course.getName());
+                System.out.println( course.getName());
                 System.out.println("Grade spread: " + (Collections.max(grades) - Collections.min(grades)));
                 System.out.println("Median of first 25%: " + medianFirstQuarter);
                 System.out.println("Median of last 25%: " + medianLastQuarter);
@@ -89,6 +89,7 @@ public class GradeSpread {
                 System.out.println("No grades found for course: " + course.getName());
             }
         }
+
     }
 
     private static double calculateMedian(List<Double> grades){
