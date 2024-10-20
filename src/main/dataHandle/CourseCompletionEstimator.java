@@ -87,23 +87,28 @@ public class CourseCompletionEstimator {
     }
 
     //     Method to find students enrolled in third-year courses
-    private static Set<Integer> findThirdYearStudents(CurrentStudentManager currentStudentManager, List<Course> thirdYearCourses, List<Course> allCourses) {
+    private static Set<Integer> findThirdYearStudents(CurrentStudentManager currentStudentManager,
+                                                      List<Course> thirdYearCourses, List<Course> allCourses) {
         Set<Integer> thirdYearStudentIDs = new HashSet<>();
         Map<Integer, CurrentStudentRecord> studentRecords = currentStudentManager.getAllStudentRecords();
-        
-        for(Map.Entry<Integer, CurrentStudentRecord> entry : studentRecords.entrySet()){
-        
-        int studentID = entry.getKey();
-        CurrentStudentRecord record = entry.getValue();
-        List<Double> grades = record.getCourseGrades();
-       
-        for (Course course : thirdYearCourses) {
-            if () {
-                thirdYearStudentIDs.add(studentID);
-            }
 
+        // Find the indices of third-year courses in the allCourses list
+        List<Integer> thirdYearCourseIndices = new ArrayList<>();
+        for (Course thirdYearCourse : thirdYearCourses) {
+            int courseIndex = allCourses.indexOf(thirdYearCourse);
+            if (courseIndex >= 0) { // >= 0 because, if there is no match then it will return -1
+                thirdYearCourseIndices.add(courseIndex);
             }
-        
+        }
+        for (CurrentStudentRecord student : studentRecords.values()) {
+            List<Double> grades = student.getCourseGrades();
+
+            for (Integer courseIndex : thirdYearCourseIndices) {
+                if (grades.get(courseIndex) != null) {
+                    thirdYearStudentIDs.add(student.getStudentID());
+                    break; // No need to check further, we know this student is in third year
+                }
+            }
         }
         return thirdYearStudentIDs;
     }
