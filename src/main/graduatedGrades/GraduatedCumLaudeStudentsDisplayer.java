@@ -1,9 +1,13 @@
-package src.main;
+package src.main.graduatedGrades;
+
+import src.main.dataHandle.Course;
+import src.main.dataHandle.CourseManager;
+import src.main.dataHandle.GraduatedStudentRecord;
 
 import java.util.List;
 import java.util.ArrayList;
 
-public class GraduatedCumLaudeStudents {
+public class GraduatedCumLaudeStudentsDisplayer {
 
     public static void main(String[] args) {
         // Use CourseManager to load data

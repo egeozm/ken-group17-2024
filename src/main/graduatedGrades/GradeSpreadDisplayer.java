@@ -1,9 +1,12 @@
-package src.main;
+package src.main.graduatedGrades;
+
+import src.main.dataHandle.Course;
+import src.main.dataHandle.CourseManager;
 
 import java.util.List;
 import java.util.Collections;
 
-public class GradeSpread {
+public class GradeSpreadDisplayer {
 
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();

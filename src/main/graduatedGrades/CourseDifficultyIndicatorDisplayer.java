@@ -1,9 +1,12 @@
-package src.main;
+package src.main.graduatedGrades;
+
+import src.main.dataHandle.Course;
+import src.main.dataHandle.CourseManager;
 
 import java.util.Comparator;
 import java.util.List;
 
-public class CourseDifficultyIndicator {
+public class CourseDifficultyIndicatorDisplayer {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
