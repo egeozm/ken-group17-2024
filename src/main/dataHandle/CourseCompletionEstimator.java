@@ -88,7 +88,24 @@ public class CourseCompletionEstimator {
 
     //     Method to find students enrolled in third-year courses
     private static Set<Integer> findThirdYearStudents(CurrentStudentManager currentStudentManager, List<Course> thirdYearCourses, List<Course> allCourses) {
-        return null;
+        Set<Integer> thirdYearStudentIDs = new HashSet<>();
+        Map<Integer, CurrentStudentRecord> studentRecords = currentStudentManager.getAllStudentRecords();
+        
+        for(Map.Entry<Integer, CurrentStudentRecord> entry : studentRecords.entrySet()){
+        
+        int studentID = entry.getKey();
+        CurrentStudentRecord record = entry.getValue();
+        List<Double> grades = record.getCourseGrades();
+       
+        for (Course course : thirdYearCourses) {
+            if () {
+                thirdYearStudentIDs.add(studentID);
+            }
+
+            }
+        
+        }
+        return thirdYearStudentIDs;
     }
 }
 
