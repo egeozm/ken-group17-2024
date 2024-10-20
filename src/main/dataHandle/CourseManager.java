@@ -36,6 +36,7 @@ public class CourseManager {
                 for (int j = 1; j < dataSet.length; j++) { // Skip the header row
                     String gradeStr = dataSet[j][i].trim(); // Trim to remove any extra spaces
                     if (gradeStr.equalsIgnoreCase("NG") || gradeStr.isEmpty()) {
+                        grades.add(null);
                         continue;
                     }
                     try {
@@ -45,6 +46,7 @@ public class CourseManager {
                         count++;
                     } catch (NumberFormatException e) {
                         System.out.println("Invalid grade at row " + j + ", column " + i);
+                        grades.add(null);
                     }
                 }
 
@@ -70,10 +72,14 @@ public class CourseManager {
     // Method to calculate the standard deviation for a specific course column
     private double calculateStandardDeviation(List<Double> grades, double mean) {
         double sum = 0;
-        for (double grade : grades) {
-            sum += Math.pow(grade - mean, 2);
+        int count = 0;
+        for (Double grade : grades) {
+            if (grade != null) {
+                sum += Math.pow(grade - mean, 2);
+                count++;
+            }
         }
-        return (grades.size() > 0) ? Math.sqrt(sum / grades.size()) : 0;
+        return (grades.size() > 0) ? Math.sqrt(sum / count) : 0;
     }
 
     public static double calculateMostCommonGrade(List<Double> grades) {
@@ -83,10 +89,12 @@ public class CourseManager {
 
         int[] frequency = new int[11]; // Assuming the grades are between 0-10
 
-        for (double grade : grades) {
-            int index = (int) grade;
-            if (index >= 0 && index <= 10) {
-                frequency[index]++;
+        for (Double grade : grades) {
+            if (grade != null) {
+                int index = (int) grade.doubleValue();
+                if (index >= 0 && index <= 10) {
+                    frequency[index]++;
+                }
             }
         }
 

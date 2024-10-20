@@ -1,4 +1,6 @@
-package src.main.dataHandle;
+package src.main.currentGrades;
+
+import src.main.dataHandle.*;
 
 import java.util.*;
 
@@ -79,6 +81,27 @@ public class CourseCompletionEstimator {
         }
         System.out.println("Total students likely to graduate: " + graduatingStudents.size());
 
+        Course mostFailedCourse = findMostFailedCourse(courses, notStartedCourses, currentStudentManager, 6.0);
+        Course mostPassedCourse = findMostPassedCourse(courses, notStartedCourses, currentStudentManager, 6.0);
+
+        System.out.printf("\nCourse most people fail: %s, Average Grade: %.2f, Std: %.2f",
+                mostFailedCourse.getName(),
+                mostFailedCourse.getAverageGrade(),
+                mostFailedCourse.getStandardDeviation());
+
+        System.out.printf("\n Highest grade: %.2f, Lowest grade: %.2f\n",
+                mostFailedCourse.getHighestGrade(mostFailedCourse.getGrades()),
+                mostFailedCourse.getLowestGrade(mostFailedCourse.getGrades()));
+
+        System.out.printf("\nCourse most people pass: %s, Average Grade: %.2f, Std: %.2f",
+                mostPassedCourse.getName(),
+                mostPassedCourse.getAverageGrade(),
+                mostPassedCourse.getStandardDeviation());
+
+        System.out.printf("\n Highest grade: %.2f, Lowest grade: %.2f",
+                mostPassedCourse.getHighestGrade(mostPassedCourse.getGrades()),
+                mostPassedCourse.getLowestGrade(mostPassedCourse.getGrades()));
+
     }
 
     // Method to count how many students completed the course (non-null grades)
@@ -121,6 +144,74 @@ public class CourseCompletionEstimator {
         return notStartedCourses;
     }
 
+    private static Course findMostFailedCourse(List<Course> courses, List<Course> notStartedCourses, CurrentStudentManager studentManager, double passingGrade) {
+        Map<Integer, CurrentStudentRecord> studentRecord = studentManager.getAllStudentRecords();
+        Course mostFailedCourse = null;
+        int maxFailures = 0;
 
+        Set<Integer> notStartedIndices = new HashSet<>();
+        for (Course course : notStartedCourses) {
+            notStartedIndices.add(course.getColumnIndex());
+        }
+        for (Course course : courses) {
+            if (notStartedIndices.contains(course.getColumnIndex())) {
+                continue;
+            }
+            int failureCount = 0;
+            for (CurrentStudentRecord student : studentRecord.values()) {
+                List<Double> grades = student.getCourseGrades();
+                int courseIndex = course.getColumnIndex();
+                if (courseIndex >= 0 && courseIndex < grades.size()) {
+                    Double grade = grades.get(courseIndex);
+                    if (grade != null && grade < passingGrade) {
+                        failureCount++;
+                    }
+                }
+            }
+            if (failureCount > maxFailures) {
+                maxFailures = failureCount;
+                mostFailedCourse = course;
+            }
+        }
+        return mostFailedCourse;
+    }
+
+    private static Course findMostPassedCourse(List<Course> allCourses, List<Course> notStartedCourses, CurrentStudentManager studentManager, double passingGrade) {
+        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+        Course mostPassedCourse = null;
+        int maxPasses = 0;
+
+        Set<Integer> notStartedIndices = new HashSet<>();
+        for (Course course : notStartedCourses) {
+            notStartedIndices.add(course.getColumnIndex());
+        }
+
+
+        for (Course course : allCourses) {
+            if (notStartedIndices.contains(course.getColumnIndex())) {
+                continue;
+            }
+
+            int passCount = 0;
+            for (CurrentStudentRecord student : studentRecords.values()) {
+                List<Double> grades = student.getCourseGrades();
+                int courseIndex = course.getColumnIndex();
+                if (courseIndex >= 0 && courseIndex < grades.size()) {
+                    Double grade = grades.get(courseIndex);
+
+                    if (grade != null && grade >= passingGrade) {
+                        passCount++;
+                    }
+                }
+            }
+
+            if (passCount > maxPasses) {
+                maxPasses = passCount;
+                mostPassedCourse = course;
+            }
+        }
+
+        return mostPassedCourse;
+    }
 }
 

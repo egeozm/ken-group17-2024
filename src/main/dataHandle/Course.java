@@ -50,9 +50,11 @@ public class Course {
         }
 
         double minGrade = Double.MAX_VALUE;
-        for (double grade : grades) {
-            if (grade < minGrade) {
-                minGrade = grade;
+        for (Double grade : grades) {
+            if (grade != null) {
+                if (grade < minGrade) {
+                    minGrade = grade;
+                }
             }
         }
         return minGrade;
@@ -64,9 +66,11 @@ public class Course {
         }
 
         double maxGrade = Double.MIN_VALUE;
-        for (double grade : grades) {
-            if (grade > maxGrade) {
-                maxGrade = grade;
+        for (Double grade : grades) {
+            if (grade != null) {
+                if (grade > maxGrade) {
+                    maxGrade = grade;
+                }
             }
         }
         return maxGrade;
