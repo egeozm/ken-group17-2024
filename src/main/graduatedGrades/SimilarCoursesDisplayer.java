@@ -1,4 +1,7 @@
-package src.main;
+package src.main.graduatedGrades;
+
+import src.main.dataHandle.Course;
+import src.main.dataHandle.CourseManager;
 
 import java.util.List;
 
@@ -6,6 +9,7 @@ public class SimilarCoursesDisplayer {
 
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadGraduateGrades();
         List<Course> courses = courseManager.getCourseRecords();
 
         int similarCoursesCount = 0;

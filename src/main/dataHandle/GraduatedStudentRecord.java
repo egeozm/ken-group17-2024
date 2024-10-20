@@ -1,4 +1,4 @@
-package src.main;
+package src.main.dataHandle;
 
 import java.util.List;
 
@@ -30,6 +30,9 @@ public class GraduatedStudentRecord {
 
     public double getGPA() {
         return GPA;
+    }
+    public List<Double> getCourseGrades() {
+        return courseGrades;
     }
 
 }

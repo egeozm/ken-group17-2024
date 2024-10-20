@@ -1,11 +1,15 @@
-package src.main;
+package src.main.graduatedGrades;
+
+import src.main.dataHandle.Course;
+import src.main.dataHandle.CourseManager;
 
 import java.util.Comparator;
 import java.util.List;
 
-public class CourseDifficultyIndicator {
+public class CourseDifficultyIndicatorDisplayer {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadGraduateGrades();
         List<Course> sortedCourses = courseManager.getCourseRecords();
         // Changing their position in the list not creating anything new.
         sortedCourses.sort(Comparator.comparingDouble(Course::getAverageGrade));
@@ -13,8 +17,12 @@ public class CourseDifficultyIndicator {
 
         Course hardestCourse = sortedCourses.get(0);
         Course easiestCourse = sortedCourses.get(sortedCourses.size() - 1);
+
+        // Display hardest course.
         System.out.printf("The hardest course is: %s, with average: %.3f, Std Dev: %.3f\n",
                 hardestCourse.getName(), hardestCourse.getAverageGrade(), hardestCourse.getStandardDeviation());
+
+        // Display easiest course.
         System.out.printf("The easiest course is: %s, with average: %.3f, Std Dev: %.3f\n",
                 easiestCourse.getName(), easiestCourse.getAverageGrade(), easiestCourse.getStandardDeviation());
 
@@ -23,7 +31,7 @@ public class CourseDifficultyIndicator {
         int count = 1;
         for (Course course : sortedCourses) {
             System.out.printf("Course %d: %s, with average: %.3f, Std Dev: %.3f, most common grade: %.3f\n",
-                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation(),course.getMostCommonGrade());
+                    count, course.getName(), course.getAverageGrade(), course.getStandardDeviation(), course.getMostCommonGrade());
             count++;
         }
     }
