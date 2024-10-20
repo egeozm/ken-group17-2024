@@ -1,24 +1,13 @@
 package src.main.dataHandle;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 public class CourseCompletionEstimator {
-    // From NoFailedStudents.java
-    String csvFile = "src/csvFiles/CurrentGrades.csv";
-    String line;
-    String csvSplitBy = ",";
 
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadCurrentGrades();
         List<Course> courses = courseManager.getCourseRecords();
-
-        // From NoFailedStudents.java
-        NoFailedStudents noFailedStudents = new NoFailedStudents();
-        noFailedStudents.findFailedStudents();
 
         CurrentStudentManager currentStudentManager = new CurrentStudentManager();
 
@@ -62,7 +51,10 @@ public class CourseCompletionEstimator {
         printCoursesByYear("3 Year", thirdYearCourses);
 
         // Find students taking third-year courses
-        Set<Integer> thirdYearStudentIDs = findThirdYearStudents(currentStudentManager, thirdYearCourses, courses);
+        Set<Integer> thirdYearStudentIDs = ThirdYearStudentFinder.findThirdYearStudents(currentStudentManager, thirdYearCourses);
+
+        // Define not-started courses
+        List<Course> notStartedCourses = getNotStartedCourses(courses);
 
         System.out.println("Students likely in third year based on courses:");
         int count = 0;
@@ -72,6 +64,20 @@ public class CourseCompletionEstimator {
         }
         System.out.println("Number of students in third year: " + count);
 
+        System.out.println("\nNot started courses:");
+        for (Course course : notStartedCourses) {
+            System.out.println(course.getName());
+        }
+
+        // Find the students who will likely graduate (with a pass threshold of 6.00)
+        Set<Integer> graduatingStudents = GraduatingStudentFinder.findGraduatingStudents(currentStudentManager, thirdYearStudentIDs, courses, notStartedCourses, 6.0);
+
+        // Output graduating students
+        System.out.println("\nStudents likely to graduate:");
+        for (Integer studentID : graduatingStudents) {
+            System.out.println("Student ID: " + studentID);
+        }
+        System.out.println("Total students likely to graduate: " + graduatingStudents.size());
 
     }
 
@@ -98,57 +104,23 @@ public class CourseCompletionEstimator {
         System.out.println();
     }
 
-    //     Method to find students enrolled in third-year courses
-    private static Set<Integer> findThirdYearStudents(CurrentStudentManager currentStudentManager,
-                                                      List<Course> thirdYearCourses, List<Course> allCourses) {
-        Set<Integer> thirdYearStudentIDs = new HashSet<>();
-        Map<Integer, CurrentStudentRecord> studentRecords = currentStudentManager.getAllStudentRecords();
-
-        for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCourseGrades();
-            for (Course thirdYearCourse : thirdYearCourses) {
-                int courseIndex = thirdYearCourse.getColumnIndex();
-                if (courseIndex >= 0 && courseIndex < grades.size() && grades.get(courseIndex) != null) {
-                    thirdYearStudentIDs.add(student.getStudentID());
+    private static List<Course> getNotStartedCourses(List<Course> courses) {
+        List<Course> notStartedCourses = new ArrayList<>();
+        for (Course course : courses) {
+            boolean allGradeNull = true;
+            for (Double grade : course.getGrades()) {
+                if (grade != null) {
+                    allGradeNull = false;
                     break;
                 }
             }
-        }
-        return thirdYearStudentIDs;
-    }
-
-    // From NoFailedStudents.java
-    public void findFailedStudents() {
-        try(BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
-            String headerLine = br.readLine();
-            String[] courses = headerLine.split(csvSplitBy);
-
-            List<String> failedStudentsList = new ArrayList<>();
-            List<List<String>> failedCoursesList = new ArrayList<>();
-
-            while((line = br.readLine()) != null){
-                String[] values = line.split(csvSplitBy);
-                String studentID = values[0];
-                List<String> failedCourses = new ArrayList<>();
-
-                for(int i = 1; i < values.length; i++){
-                    if("NG".equals(values[i])){
-                        failedCourses.add(courses[i]);
-                    }
-                }
-                if(!failedCourses.isEmpty()){
-                    failedStudentsList.add(studentID);
-                    failedCoursesList.add(failedCourses);
-                }
+            if (allGradeNull) {
+                notStartedCourses.add(course);
             }
-            int numberOfFailedStudents = failedStudentsList.size();
-
-            // Print the results.
-            System.out.println("(!) List of students who failed at least one course: " + failedStudentsList);
-            System.out.println("(!) Number of entries: " + numberOfFailedStudents);
-        } catch(IOException e){
-            e.printStackTrace();
         }
+        return notStartedCourses;
     }
+
+
 }
 

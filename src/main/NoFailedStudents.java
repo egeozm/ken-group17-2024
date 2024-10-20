@@ -1,4 +1,4 @@
-package src.main.dataHandle;
+package src.main;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
