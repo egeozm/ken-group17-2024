@@ -4,14 +4,16 @@ import java.util.List;
 
 public class Course {
     private final String name;
+    private final int columnIndex;  // Column index from the CSV file
     private final double averageGrade;
     private final double standardDeviation;
     private final List<Double> grades; // Add a list to store individual grades for each course
     private final double mostCommonGrade;
 
 
-    public Course(String name, double averageGrade, double standardDeviation, List<Double> grades, double mostCommonGrade) {
+    public Course(String name, int columnIndex, double averageGrade, double standardDeviation, List<Double> grades, double mostCommonGrade) {
         this.name = name;
+        this.columnIndex = columnIndex;
         this.averageGrade = averageGrade;
         this.standardDeviation = standardDeviation;
         this.grades = grades;
@@ -20,6 +22,10 @@ public class Course {
 
     public String getName() {
         return name;
+    }
+
+    public int getColumnIndex() {
+        return columnIndex;
     }
 
     public double getAverageGrade() {

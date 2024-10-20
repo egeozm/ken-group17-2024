@@ -52,7 +52,7 @@ public class CourseManager {
                 double standardDeviation = calculateStandardDeviation(grades, averageGrade);
                 double mostCommonGrade = calculateMostCommonGrade(grades);
 
-                courses.add(new Course(courseName, averageGrade, standardDeviation, grades, mostCommonGrade));
+                courses.add(new Course(courseName, i - 1, averageGrade, standardDeviation, grades, mostCommonGrade));
             }
         }
     }

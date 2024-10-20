@@ -59,8 +59,9 @@ public class CourseCompletionEstimator {
             count++;
             System.out.println("Student ID: " + studentID);
         }
-        System.out.println();
-        System.out.println(count);
+        System.out.println("Number of students in third year: " + count);
+
+
     }
 
     // Method to count how many students completed the course (non-null grades)
@@ -92,21 +93,13 @@ public class CourseCompletionEstimator {
         Set<Integer> thirdYearStudentIDs = new HashSet<>();
         Map<Integer, CurrentStudentRecord> studentRecords = currentStudentManager.getAllStudentRecords();
 
-        // Find the indices of third-year courses in the allCourses list
-        List<Integer> thirdYearCourseIndices = new ArrayList<>();
-        for (Course thirdYearCourse : thirdYearCourses) {
-            int courseIndex = allCourses.indexOf(thirdYearCourse);
-            if (courseIndex >= 0) { // >= 0 because, if there is no match then it will return -1
-                thirdYearCourseIndices.add(courseIndex);
-            }
-        }
         for (CurrentStudentRecord student : studentRecords.values()) {
             List<Double> grades = student.getCourseGrades();
-
-            for (Integer courseIndex : thirdYearCourseIndices) {
-                if (grades.get(courseIndex) != null) {
+            for (Course thirdYearCourse : thirdYearCourses) {
+                int courseIndex = thirdYearCourse.getColumnIndex();
+                if (courseIndex >= 0 && courseIndex < grades.size() && grades.get(courseIndex) != null) {
                     thirdYearStudentIDs.add(student.getStudentID());
-                    break; // No need to check further, we know this student is in third year
+                    break;
                 }
             }
         }
