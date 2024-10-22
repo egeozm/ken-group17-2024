@@ -14,7 +14,7 @@ public class Student {
         this.plasmaConductivityQuotient = plasmaConductivityQuotient;
         this.chronoAdaptationRate = chronoAdaptationRate;
         this.telepathicSynchronisationIndex = telepathicSynchronisationIndex;
-        this. aethericResonanceCapacity = aethericResonanceCapacity;
+        this.aethericResonanceCapacity = aethericResonanceCapacity;
     }
 
     public int getStudentID(){
