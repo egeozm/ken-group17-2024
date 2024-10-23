@@ -61,6 +61,12 @@ public class PredictionManager {
         }
         calculateAndPrint(group1Grades, "Group 1 (Matches Boundary or Above)");
         calculateAndPrint(group2Grades, "Group 2 (Below Boundary or Not Matching)");
+        System.out.printf("Comparison between Group 1 and Group 2 : \n");
+        double mean1 = calculateAverage(group1Grades);
+        double mean2 = calculateAverage(group2Grades);
+        System.out.printf(" - Average difference: %.2f\n", Math.abs(mean1 - mean2));
+        System.out.printf(" - Std Dev difference: %.2f\n", Math.abs(calculateStandardDeviation(group1Grades, mean1) - calculateStandardDeviation(group2Grades, mean2)));
+
     }
 
     private void calculateAndPrint(List<Double> grades, String label) {
