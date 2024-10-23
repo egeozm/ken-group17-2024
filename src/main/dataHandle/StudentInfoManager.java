@@ -49,6 +49,10 @@ public class StudentInfoManager {
         }
         return null;
     }
+
+    public int size() {
+        return students.size(); // This works
+    }
 }
 
 /*
