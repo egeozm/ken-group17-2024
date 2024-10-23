@@ -16,13 +16,16 @@ public class PredictionManager {
         this.studentInfoManager = studentInfoManager;
     }
 
-    public void compareAverageGradeForProperty(String courseName, String property) {
+    // Method to compare average grades for a course by a specific property
+    // Handle both boundary for numeric and group-based for categorical properties
+    public void compareAverageGradeForProperty(String courseName, String property, Object boundaryValue) {
         Course targetCourse = findCourseByName(courseName);
         if (targetCourse == null) {
             System.out.println("Course not found: " + courseName);
         }
 
-        Map<String, List<Double>> propertyGroups = new HashMap<>();
+        List<Double> group1Grades = new ArrayList<>();
+        List<Double> group2Grades = new ArrayList<>();
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
 
         for (CurrentStudentRecord student : studentRecords.values()) {
@@ -35,26 +38,64 @@ public class PredictionManager {
                     // Get the student information from StudentInfoManager
                     StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
                     if (infoRecord != null) {
-                        String propertyValue = getStudentProperty(infoRecord, property);
-                        // Check if the group exists, if not, create a new list
-                        if (!propertyGroups.containsKey(propertyValue)) {
-                            propertyGroups.put(propertyValue, new ArrayList<>());
+                        Object propertyValue = getStudentProperty(infoRecord, property); // Object is used because method can return different type of values
+
+                        if (isNumericProperty(property)) {
+                            // For numeric properties
+                            if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
+                                group1Grades.add(grade); // Above boundary or in first group
+                            } else {
+                                group2Grades.add(grade); // Below boundary or in second group
+                            }
+                        } else {
+                            // For categorical properties
+                            if (propertyValue.equals(boundaryValue)) {
+                                group1Grades.add(grade); // Matches boundary
+                            } else {
+                                group2Grades.add(grade); // UnMatches boundary
+                            }
                         }
-                        // Add the grade to the existing list
-                        propertyGroups.get(propertyValue).add(grade);
                     }
                 }
             }
         }
-        // With Map.Entry: You retrieve both the key and value together in a single Map.Entry object.
-        for (Map.Entry<String, List<Double>> entry : propertyGroups.entrySet()) {
-            String group = entry.getKey();
-            List<Double> grades = entry.getValue();
-            double average = calculateAverage(grades);
-            double stdDev = calculateStandardDeviation(grades, average);
+        calculateAndPrint(group1Grades, "Group 1 (Matches Boundary or Above)");
+        calculateAndPrint(group2Grades, "Group 2 (Below Boundary or Not Matching)");
+    }
 
-            System.out.printf("Group: %s | Average Grade: %.2f | Std Dev: %.2f | Number of Students: %d\n", group, average, stdDev, grades.size());
+    private void calculateAndPrint(List<Double> grades, String label) {
+        double average = calculateAverage(grades);
+        double stdDev = calculateStandardDeviation(grades, average);
+        System.out.printf("%s | Average Grade: %.2f | Std Dev: %.2f | Number of Students: %d\n", label, average, stdDev, grades.size());
+    }
+
+    private boolean isNumericProperty(String property) {
+        return property.equals("Plasma Conductivity Quotient") || property.equals("Chrono-Adaptation Rate") ||
+                property.equals("Aetheric Resonance Capacity");
+    }
+
+    private boolean comparePropertyToBoundary(Object propertyValue, Object boundaryValue) {
+        // Check if propertyValue is a string with numeric content, handle accordingly
+        if (propertyValue instanceof String && boundaryValue instanceof Number) {
+            try {
+                // Parse the string to extract a numeric value
+                double propNumericValue = Double.parseDouble(propertyValue.toString().replaceAll("[^\\d.]", ""));
+                double boundValue = ((Number) boundaryValue).doubleValue();
+                return propNumericValue >= boundValue;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid numeric format: " + propertyValue);
+                return false;
+            }
         }
+
+        // If both are numbers, compare them directly
+        if (propertyValue instanceof Number && boundaryValue instanceof Number) {
+            return ((Number) propertyValue).doubleValue() >= ((Number) boundaryValue).doubleValue();
+        }
+
+        // Default fallback: Return false if types are incompatible
+        System.out.println("Error: Incompatible types for comparison: " + propertyValue + " and " + boundaryValue);
+        return false;
     }
 
     private Course findCourseByName(String courseName) {
@@ -101,13 +142,13 @@ public class PredictionManager {
 
 /*
     Usage:
+        CurrentStudentManager currentStudentManager = new CurrentStudentManager();
+        StudentInfoManager studentInfoManager = new StudentInfoManager();
+        CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadCurrentGrades();
+        List<Course> courses = courseManager.getCourseRecords();
+        PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager);
+        predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "B");
 
-    CurrentStudentManager currentStudentManager = new CurrentStudentManager();
-    StudentInfoManager studentInfoManager = new StudentInfoManager();
-    CourseManager courseManager = CourseManager.getInstance();
-    courseManager.loadCurrentGrades();
-    List<Course> courses = courseManager.getCourseRecords();
-    PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager);
-    predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Aetheric Resonance Capacity");
 
  */
