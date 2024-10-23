@@ -15,8 +15,8 @@ public class DifferenceInAverageGradeForPropertyChecker {
     }
     
 
-    public static void main(String[] args) {
-        
+    
+    public ArrayList<ArrayList<String>> gatherStudentsByNeuroSynapticLevel(){
         DifferenceInAverageGradeForPropertyChecker checker = new DifferenceInAverageGradeForPropertyChecker();
         
         
@@ -26,7 +26,7 @@ public class DifferenceInAverageGradeForPropertyChecker {
         for (StudentInfoRecord student : checker.students) {
             if (student.getNeuroSynapticInterfaceLevel().equalsIgnoreCase("low")) {
                 
-                ArrayList<String> studendIDlow = new ArrayList<String>();
+                ArrayList<String> studendIDlow = new ArrayList<>();
                 studendIDlow.add(String.valueOf(student.getStudentID()));
                 studentIDHolder.add(studendIDlow);
                 
@@ -60,7 +60,9 @@ public class DifferenceInAverageGradeForPropertyChecker {
                 
             }
             
-        }
         
+        
+     }
+     return studentIDHolder;
     }
 }
