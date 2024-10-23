@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// Manages all current student records
 public class CurrentStudentManager {
     // Map student ID to their CurrentStudentRecord
     private final Map<Integer, CurrentStudentRecord> studentRecords;
@@ -16,12 +15,10 @@ public class CurrentStudentManager {
         loadStudentRecords();  // Load student records from data source when instantiated
     }
 
-    // Method to load student records from a data source (e.g., a CSV or database)
+    // Method to load student records from a data source
     private void loadStudentRecords() {
-        // Assuming you use something like TwoDimensionalArray.readCsvInto2DArray to read the data
         String[][] data = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
 
-        // Assuming first column is student ID and subsequent columns are grades
         for (int i = 1; i < data.length; i++) {  // Skip header row
             int studentID = Integer.parseInt(data[i][0].trim());  // Student ID in the first column
             List<Double> courseGrades = parseGrades(data[i]);  // Parse the grades for each course

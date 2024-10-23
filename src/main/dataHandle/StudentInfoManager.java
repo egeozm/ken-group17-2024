@@ -8,9 +8,10 @@ public class StudentInfoManager {
 
     public StudentInfoManager() {
         students = new ArrayList<>();
+        loadStudentsFromCSV();
     }
 
-    public void loadStudentsFromSSV() {
+    private void loadStudentsFromCSV() {
         String[][] data = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/StudentInfo.csv");
 
         if (data != null) {
@@ -66,7 +67,7 @@ for (StudentInfoRecord student : manager.getAllStudents()) {
     System.out.println(student);
   }
 
-tudentInfoRecord foundStudent = manager.getStudentByID(210333);
+StudentInfoRecord foundStudent = manager.getStudentByID(210333);
 System.out.println("Found Student: " + foundStudent);
 
  */

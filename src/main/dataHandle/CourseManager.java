@@ -87,11 +87,11 @@ public class CourseManager {
             return 0;
         }
 
-        int[] frequency = new int[11]; // Assuming the grades are between 0-10
+        int[] frequency = new int[11]; // the grades are between 0-10
 
         for (Double grade : grades) {
             if (grade != null) {
-                int index = (int) grade.doubleValue(); // is this needed, couldn't we use this: int index = grade.intValue();
+                int index =  grade.intValue();
                 if (index >= 0 && index <= 10) {
                     frequency[index]++;
                 }
