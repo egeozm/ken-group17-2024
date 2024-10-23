@@ -1,9 +1,6 @@
-package src.main.currentGrades;
+package src.main.dataHandle;
 
 import java.util.*;
-
-import src.main.dataHandle.StudentInfoManager;
-import src.main.dataHandle.StudentInfoRecord;
 
 public class DifferenceInAverageGradeForPropertyChecker {
 
