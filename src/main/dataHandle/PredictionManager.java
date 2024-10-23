@@ -77,9 +77,14 @@ public class PredictionManager {
     private boolean comparePropertyToBoundary(Object propertyValue, Object boundaryValue) {
         // Check if propertyValue is a string with numeric content, handle accordingly
         if (propertyValue instanceof String && boundaryValue instanceof Number) {
+            /*
+            This scenario occurs when we have a string that contains a number along with non-numeric characters
+            (like "5.0 Hz").
+            The method aims to extract the numeric part of the string and then compare it to boundaryValue.
+             */
             try {
                 // Parse the string to extract a numeric value
-                double propNumericValue = Double.parseDouble(propertyValue.toString().replaceAll("[^\\d.]", ""));
+                double propNumericValue = Double.parseDouble(propertyValue.toString().replaceAll("[^\\d.]", "")); // Fixed usage you can always search on the internet before use it. Don't try to remember it.
                 double boundValue = ((Number) boundaryValue).doubleValue();
                 return propNumericValue >= boundValue;
             } catch (NumberFormatException e) {
