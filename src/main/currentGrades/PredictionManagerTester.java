@@ -18,7 +18,10 @@ public class PredictionManagerTester {
         courseManager.loadCurrentGrades();
         List<Course> courses = courseManager.getCourseRecords();
         PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager);
-        predictionManager.compareAverageGradeForProperty("Nebulon Astrophysics", "Neuro-Synaptic Interface Level", "low");
+        
+        //Change the values below to check for a different course or property
+
+        predictionManager.compareAverageGradeForProperty("Arkonian Warfare Tactics", "Neuro-Synaptic Interface Level", "low");
     }
 
 }

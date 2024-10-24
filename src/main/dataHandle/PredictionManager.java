@@ -31,15 +31,20 @@ public class PredictionManager {
         for (CurrentStudentRecord student : studentRecords.values()) {
             List<Double> grades = student.getCompletedCourseGrades();
             int courseIndex = targetCourse.getColumnIndex();
-
+            System.out.printf("Student ID: %d | Course: %s | Course Index: %d | Grades Size: %d\n", 
+                  student.getStudentID(), targetCourse.getName(), courseIndex, grades.size());
             if (courseIndex >= 0 && courseIndex < grades.size()) {
                 Double grade = grades.get(courseIndex);
+                if (grade == null) {
+                    System.out.printf("Student ID: %d | No grade found for course: %s\n", student.getStudentID(), courseName);
+                    continue; // Skip students with null grades
+                }
                 if (grade != null) {
                     // Get the student information from StudentInfoManager
                     StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
                     if (infoRecord != null) {
                         Object propertyValue = getStudentProperty(infoRecord, property); // Object is used because method can return different type of values
-
+                        System.out.printf("Student ID: %d | Property Value: %s\n", student.getStudentID(), propertyValue);
                         if (isNumericProperty(property)) {
                             // For numeric properties
                             if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
