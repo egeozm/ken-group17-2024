@@ -29,7 +29,7 @@ public class PredictionManager {
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
 
         for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCompletedCourseGrades();
+            List<Double> grades = student.getCourseGrades();
             int courseIndex = targetCourse.getColumnIndex();
             System.out.printf("Student ID: %d | Course: %s | Course Index: %d | Grades Size: %d\n", 
                   student.getStudentID(), targetCourse.getName(), courseIndex, grades.size());
