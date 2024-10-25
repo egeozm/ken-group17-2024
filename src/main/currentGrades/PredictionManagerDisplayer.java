@@ -5,12 +5,10 @@ import src.main.dataHandle.CourseManager;
 import src.main.dataHandle.CurrentStudentManager;
 import src.main.dataHandle.PredictionManager;
 import src.main.dataHandle.StudentInfoManager;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class PredictionManagerTester {
+import java.util.List;
+
+public class PredictionManagerDisplayer {
     public static void main(String[] args) {
         CurrentStudentManager currentStudentManager = new CurrentStudentManager();
         StudentInfoManager studentInfoManager = new StudentInfoManager();
