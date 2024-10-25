@@ -173,6 +173,14 @@ public class PredictionManager {
             return;
         }
 
+
+        // Check if there are any grades for this course
+        if (!courseHasGrades(targetCourse)) {
+            System.out.println("No students have completed the course: " + courseName);
+            return; // Exit the method since no variance reduction can be calculated
+        }
+
+
         // List of properties to evaluate
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
@@ -455,6 +463,18 @@ public class PredictionManager {
             sum += Math.pow(grade - mean, 2);
         }
         return (!grades.isEmpty()) ? sum / grades.size() : 0.0;
+    }
+
+    private boolean courseHasGrades(Course course) {
+        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+        for (CurrentStudentRecord student : studentRecords.values()) {
+            List<Double> grades = student.getCourseGrades();
+            int courseIndex = course.getColumnIndex();
+            if (courseIndex >= 0 && courseIndex < grades.size() && grades.get(courseIndex) != null) {
+                return true; // If any grade is found, return true
+            }
+        }
+        return false; // No grades found
     }
 }
 
