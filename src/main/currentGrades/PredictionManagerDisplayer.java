@@ -13,11 +13,11 @@ public class PredictionManagerDisplayer {
         List<Course> courses = courseManager.getCourseRecords();
         SimilarCourses similarCourses = new SimilarCourses(courseManager);
         PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager, similarCourses);
-//        predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "B");
-//        predictionManager.compareAverageGradeUsingOtherCourses("Vortex Quantum Mechanics", "Cybernetic Ethics", "Telepathic Synchronisation Index", "B");
-//        predictionManager.compareCourseToAllOtherCourses("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "A");
+        predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "B");
+        predictionManager.compareAverageGradeUsingOtherCourses("Vortex Quantum Mechanics", "Cybernetic Ethics", "Telepathic Synchronisation Index", "B");
+        predictionManager.compareCourseToAllOtherCourses("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "A");
         predictionManager.findBestPropertyForCourse("Vortex Quantum Mechanics");
-          //predictionManager.predictGradeForUncompletedCourse("Technotronic Linguistic Fusion", 212988);
+        predictionManager.predictGradeForUncompletedCourse("Vortex Quantum Mechanics", 212988);
     }
 
 }

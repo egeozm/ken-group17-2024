@@ -6,7 +6,7 @@ import src.main.dataHandle.SimilarCourses;
 
 import java.util.List;
 
-public class SimilarCoursesTester {
+public class SimilarCoursesDisplayer {
 
     public static void main(String[] args) {
         
