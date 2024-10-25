@@ -12,22 +12,15 @@ public class SimilarCoursesTester {
         
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
-
-        SimilarCourses similarCoursesFinder = new SimilarCourses(courseManager);
-
-        
+        SimilarCourses similarCoursesFinder = new SimilarCourses(courseManager);        
         double similarityBaseValue = 0.0; 
-
-        
         double highestSimilarity = 0.0;
         Course courseWithHighestSimilarity1 = null;
         Course courseWithHighestSimilarity2 = null;
-
-        
+     
         List<Course> courses = courseManager.getCourseRecords();
         for (Course targetCourse : courses) {
             System.out.printf("\nSimilarities for course '%s':\n", targetCourse.getName());
-
             
             Course mostSimilarCourse = similarCoursesFinder.findMostSimilarCourse(targetCourse);
             if (mostSimilarCourse != null) {
@@ -41,9 +34,7 @@ public class SimilarCoursesTester {
                 }
             } else {
                 System.out.println("  No similar course found.");
-            }
-
-            
+            }            
             List<Course> similarCourses = similarCoursesFinder.findSimilarCourses(targetCourse, similarityBaseValue);
             if (similarCourses.isEmpty()) {
                 System.out.println("  No courses found.");
@@ -54,8 +45,7 @@ public class SimilarCoursesTester {
                 }
             }
         }
-
-       
+      
         if (courseWithHighestSimilarity1 != null && courseWithHighestSimilarity2 != null) {
             System.out.println("\nHighest similarity found is between" + courseWithHighestSimilarity1.getName() + "and" + courseWithHighestSimilarity2.getName() +  "with a similarity  of: " + highestSimilarity);
         } else {
