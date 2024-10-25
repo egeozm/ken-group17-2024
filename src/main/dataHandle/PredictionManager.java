@@ -155,7 +155,7 @@ public class PredictionManager {
             if (!otherCourse.equals(mainCourse)) {
                 List<Double> otherCourseGrades = new ArrayList<>();
                 for (CurrentStudentRecord student : studentRecords.values()) {
-                    List<Double> grades = student.getCompletedCourseGrades();
+                    List<Double> grades = student.getCourseGrades();
                     int otherCourseIndex = otherCourse.getColumnIndex();
                     if (otherCourseIndex >= 0 && otherCourseIndex < grades.size()) {
                         Double otherCourseGrade = grades.get(otherCourseIndex);
@@ -321,7 +321,7 @@ public class PredictionManager {
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
 
         for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> studentGrades = student.getCompletedCourseGrades();
+            List<Double> studentGrades = student.getCourseGrades();
             int courseIndex = course.getColumnIndex();
             if (courseIndex >= 0 && courseIndex < studentGrades.size()) {
                 Double grade = studentGrades.get(courseIndex);
@@ -347,7 +347,7 @@ public class PredictionManager {
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
 
         for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCompletedCourseGrades();
+            List<Double> grades = student.getCourseGrades();
             int courseIndex = course.getColumnIndex();
             if (courseIndex >= 0 && courseIndex < grades.size()) {
                 Double grade = grades.get(courseIndex);
@@ -383,7 +383,7 @@ public class PredictionManager {
 
         // Collect all grades for the given course
         for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCompletedCourseGrades();
+            List<Double> grades = student.getCourseGrades();
             int courseIndex = course.getColumnIndex();
 
             if (courseIndex >= 0 && courseIndex < grades.size()) {
