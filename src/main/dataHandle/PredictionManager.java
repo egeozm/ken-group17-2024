@@ -216,6 +216,7 @@ public class PredictionManager {
 
         if (!bestProperties.isEmpty()) {
             System.out.printf("\nBest properties for predicting the grade (Variance Reduction: %f):\n", bestVarianceReduction);
+            System.out.println("This is the map with the best properties: " + bestProperties);
             for (Map<String, Object> propertyData : bestProperties) {
                 System.out.printf(" - Property: %s | Boundary: %s\n", propertyData.get("Property"), propertyData.get("Boundary"));
             }
