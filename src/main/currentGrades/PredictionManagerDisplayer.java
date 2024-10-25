@@ -1,10 +1,6 @@
 package src.main.currentGrades;
 
-import src.main.dataHandle.Course;
-import src.main.dataHandle.CourseManager;
-import src.main.dataHandle.CurrentStudentManager;
-import src.main.dataHandle.PredictionManager;
-import src.main.dataHandle.StudentInfoManager;
+import src.main.dataHandle.*;
 
 import java.util.List;
 
@@ -15,11 +11,13 @@ public class PredictionManagerDisplayer {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadCurrentGrades();
         List<Course> courses = courseManager.getCourseRecords();
-        PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager);
-        
-        //Change the values below to check for a different course or property
-
-        predictionManager.compareAverageGradeForProperty("Arkonian Warfare Tactics", "Neuro-Synaptic Interface Level", "low");
+        SimilarCourses similarCourses = new SimilarCourses(courseManager);
+        PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager, similarCourses);
+//        predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "B");
+//        predictionManager.compareAverageGradeUsingOtherCourses("Vortex Quantum Mechanics", "Cybernetic Ethics", "Telepathic Synchronisation Index", "B");
+//        predictionManager.compareCourseToAllOtherCourses("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "A");
+        predictionManager.findBestPropertyForCourse("Vortex Quantum Mechanics");
+          //predictionManager.predictGradeForUncompletedCourse("Technotronic Linguistic Fusion", 212988);
     }
 
 }
