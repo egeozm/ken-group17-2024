@@ -264,9 +264,12 @@ public class PredictionManager {
         }
 
         // If the student's property value matches the boundary, predict one grade, otherwise predict another
-        double predictedGrade = comparePropertyToBoundary(studentProperty, bestProperty.get("Boundary"))
-                ? calculateAverageGradeForProperty(mostSimilarCourse, (String) bestProperty.get("Property"), bestProperty.get("Boundary"))
-                : calculateAverageGradeForProperty(mostSimilarCourse, (String) bestProperty.get("Property"), null);
+        double predictedGrade;
+        if (comparePropertyToBoundary(studentProperty, bestProperty.get("Boundary"))) {
+            predictedGrade = calculateAverageGradeForProperty(mostSimilarCourse, (String) bestProperty.get("Property"), bestProperty.get("Boundary"));
+        } else {
+            predictedGrade = calculateAverageGradeForProperty(mostSimilarCourse, (String) bestProperty.get("Property"), null);
+        }
 
         System.out.printf("Predicted grade for student %d in course %s (based on similar course %s): %.2f\n",
                 studentID, uncompletedCourseName, mostSimilarCourse.getName(), predictedGrade);
@@ -359,7 +362,6 @@ public class PredictionManager {
 
                         if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
                             group1Grades.add(grade); // Matches boundary
-                            System.out.println(group1Grades);
                         } else {
                             group2Grades.add(grade); // Doesn't match boundary
                         }
