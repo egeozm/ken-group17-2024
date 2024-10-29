@@ -362,7 +362,6 @@ public class PredictionManager {
 
                         if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
                             group1Grades.add(grade); // Matches boundary
-                            System.out.println(group1Grades);
                         } else {
                             group2Grades.add(grade); // Doesn't match boundary
                         }
@@ -425,26 +424,20 @@ public class PredictionManager {
             }
         }
 
-        // For numeric properties, calculate a few potential boundary values (e.g., min, max, average)
+        // For numeric properties, add all unique values as doubles
         if (isNumericProperty(property)) {
             List<Double> numericValues = new ArrayList<>();
             for (Object value : uniqueValues) {
-                numericValues.add(Double.parseDouble(value.toString()));  // Convert property values to double
+                try {
+                    numericValues.add(Double.parseDouble(value.toString()));  // Convert property values to double
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid numeric format: " + value);  // Handle potential parse errors
+                }
             }
-
-            if (!numericValues.isEmpty()) {
-                // Calculate min, max, and average as boundary values
-                double min = Collections.min(numericValues);
-                double max = Collections.max(numericValues);
-                double average = calculateAverage(numericValues);  // Use helper method to calculate the average
-
-                boundaryValues.add(min);     // Add min value
-                boundaryValues.add(average); // Add average value
-                boundaryValues.add(max);     // Add max value
-            }
+            boundaryValues.addAll(numericValues);
         } else {
-            // For categorical properties, just return the unique values
-            boundaryValues.addAll(uniqueValues);  // Add all unique categorical values
+            // For categorical properties, just add all unique values
+            boundaryValues.addAll(uniqueValues);
         }
 
         return boundaryValues;

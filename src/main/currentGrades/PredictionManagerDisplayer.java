@@ -20,9 +20,9 @@ public class PredictionManagerDisplayer {
 //        predictionManager.findBestPropertyForCourse("Arkonian Warfare Tactics");
 //        predictionManager.findBestPropertyForCourse("ExoGenetics Evolution");
 //        predictionManager.findBestPropertyForCourse("Transdimensional Navigation");
-        predictionManager.findBestPropertyForCourse("Cybernetic Ethics");
+       predictionManager.findBestPropertyForCourse("Vortex Quantum Mechanics");
 
-        //predictionManager.predictGradeForUncompletedCourse("ExoGenetics Evolution", 212055);
+        //predictionManager.predictGradeForUncompletedCourse("Vortex Quantum Mechanics", 212055);
 
     }
 
