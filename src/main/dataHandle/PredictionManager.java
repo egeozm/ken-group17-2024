@@ -1,5 +1,7 @@
 package src.main.dataHandle;
 
+import src.main.dataHandle.SimilarCourses;
+
 import java.util.*;
 
 public class PredictionManager {
@@ -14,6 +16,62 @@ public class PredictionManager {
         this.courses = courses;
         this.studentInfoManager = studentInfoManager;
         this.similarCourses = similarCourses;
+    }
+
+    // Method to compare average grades for a course by a specific property
+    // Handle both boundary for numeric and group-based for categorical properties
+    public void compareAverageGradeForProperty(String courseName, String property, Object boundaryValue) {
+        Course targetCourse = findCourseByName(courseName);
+        if (targetCourse == null) {
+            System.out.println("Course not found: " + courseName);
+        }
+
+        List<Double> group1Grades = new ArrayList<>();
+        List<Double> group2Grades = new ArrayList<>();
+        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+
+        for (CurrentStudentRecord student : studentRecords.values()) {
+            List<Double> grades = student.getCourseGrades();
+            int courseIndex = targetCourse.getColumnIndex();
+            System.out.printf("Student ID: %d | Course: %s | Course Index: %d | Grades Size: %d\n",
+                    student.getStudentID(), targetCourse.getName(), courseIndex, grades.size());
+            if (courseIndex >= 0 && courseIndex < grades.size()) {
+                Double grade = grades.get(courseIndex);
+                if (grade == null) {
+                    System.out.printf("Student ID: %d | No grade found for course: %s\n", student.getStudentID(), courseName);
+                    continue; // Skip students with null grades
+                }
+                // Get the student information from StudentInfoManager
+                StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
+                if (infoRecord != null) {
+                    Object propertyValue = getStudentProperty(infoRecord, property); // Object is used because method can return different type of values
+                    System.out.printf("Student ID: %d | Property Value: %s\n", student.getStudentID(), propertyValue);
+                    if (isNumericProperty(property)) {
+                        // For numeric properties
+                        if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
+                            group1Grades.add(grade); // Above boundary or in first group
+                        } else {
+                            group2Grades.add(grade); // Below boundary or in second group
+                        }
+                    } else {
+                        // For categorical properties
+                        if (propertyValue.equals(boundaryValue)) {
+                            group1Grades.add(grade); // Matches boundary
+                        } else {
+                            group2Grades.add(grade); // UnMatches boundary
+                        }
+                    }
+                }
+            }
+        }
+        calculateAndPrint(group1Grades, "\nGroup 1 (Matches Boundary or Above)");
+        calculateAndPrint(group2Grades, "Group 2 (Below Boundary or Not Matching)");
+        System.out.printf("Comparison between Group 1 and Group 2 : \n");
+        double mean1 = calculateAverage(group1Grades);
+        double mean2 = calculateAverage(group2Grades);
+        System.out.printf(" - Average difference: %.2f\n", Math.abs(mean1 - mean2));
+        System.out.printf(" - Std Dev difference: %.2f\n", Math.abs(calculateStandardDeviation(group1Grades, mean1) - calculateStandardDeviation(group2Grades, mean2)));
+
     }
 
     public void findBestPropertyOrCombinationForCourse(String courseName) {
