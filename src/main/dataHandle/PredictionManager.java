@@ -1,7 +1,5 @@
 package src.main.dataHandle;
 
-import src.main.dataHandle.SimilarCourses;
-
 import java.util.*;
 
 public class PredictionManager {
@@ -16,213 +14,6 @@ public class PredictionManager {
         this.courses = courses;
         this.studentInfoManager = studentInfoManager;
         this.similarCourses = similarCourses;
-    }
-
-    // Method to compare average grades for a course by a specific property
-    // Handle both boundary for numeric and group-based for categorical properties
-    public void compareAverageGradeForProperty(String courseName, String property, Object boundaryValue) {
-        Course targetCourse = findCourseByName(courseName);
-        if (targetCourse == null) {
-            System.out.println("Course not found: " + courseName);
-        }
-
-        List<Double> group1Grades = new ArrayList<>();
-        List<Double> group2Grades = new ArrayList<>();
-        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
-
-        for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCourseGrades();
-            int courseIndex = targetCourse.getColumnIndex();
-            System.out.printf("Student ID: %d | Course: %s | Course Index: %d | Grades Size: %d\n",
-                    student.getStudentID(), targetCourse.getName(), courseIndex, grades.size());
-            if (courseIndex >= 0 && courseIndex < grades.size()) {
-                Double grade = grades.get(courseIndex);
-                if (grade == null) {
-                    System.out.printf("Student ID: %d | No grade found for course: %s\n", student.getStudentID(), courseName);
-                    continue; // Skip students with null grades
-                }
-                // Get the student information from StudentInfoManager
-                StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
-                if (infoRecord != null) {
-                    Object propertyValue = getStudentProperty(infoRecord, property); // Object is used because method can return different type of values
-                    System.out.printf("Student ID: %d | Property Value: %s\n", student.getStudentID(), propertyValue);
-                    if (isNumericProperty(property)) {
-                        // For numeric properties
-                        if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
-                            group1Grades.add(grade); // Above boundary or in first group
-                        } else {
-                            group2Grades.add(grade); // Below boundary or in second group
-                        }
-                    } else {
-                        // For categorical properties
-                        if (propertyValue.equals(boundaryValue)) {
-                            group1Grades.add(grade); // Matches boundary
-                        } else {
-                            group2Grades.add(grade); // UnMatches boundary
-                        }
-                    }
-                }
-            }
-        }
-        calculateAndPrint(group1Grades, "\nGroup 1 (Matches Boundary or Above)");
-        calculateAndPrint(group2Grades, "Group 2 (Below Boundary or Not Matching)");
-        System.out.printf("Comparison between Group 1 and Group 2 : \n");
-        double mean1 = calculateAverage(group1Grades);
-        double mean2 = calculateAverage(group2Grades);
-        System.out.printf(" - Average difference: %.2f\n", Math.abs(mean1 - mean2));
-        System.out.printf(" - Std Dev difference: %.2f\n", Math.abs(calculateStandardDeviation(group1Grades, mean1) - calculateStandardDeviation(group2Grades, mean2)));
-
-    }
-
-    public void compareAverageGradeUsingOtherCourses(String mainCourseName, String comparisonCourseName, String property, Object boundaryValue) {
-        Course mainCourse = findCourseByName(mainCourseName);
-        Course comparisonCourse = findCourseByName(comparisonCourseName);
-
-        if (mainCourse == null || comparisonCourse == null) {
-            System.out.println("One or both courses not found: " + mainCourseName + ", " + comparisonCourseName);
-            return;
-        }
-
-        List<Double> group1Grades = new ArrayList<>();
-        List<Double> group2Grades = new ArrayList<>();
-        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
-
-        for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCourseGrades();
-            int mainCourseIndex = mainCourse.getColumnIndex();
-            int comparisonCourseIndex = comparisonCourse.getColumnIndex();
-
-            if (mainCourseIndex >= 0 && mainCourseIndex < grades.size() && comparisonCourseIndex >= 0 && comparisonCourseIndex < grades.size()) {
-                Double mainCourseGrade = grades.get(mainCourseIndex);
-                Double comparisonCourseGrade = grades.get(comparisonCourseIndex);
-
-                if (mainCourseGrade != null && comparisonCourseGrade != null) {
-                    StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
-                    if (infoRecord != null) {
-                        Object propertyValue = getStudentProperty(infoRecord, property);
-
-                        if (isNumericProperty(property)) {
-                            if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
-                                group1Grades.add(mainCourseGrade); // Matches boundary
-                            } else {
-                                group2Grades.add(mainCourseGrade); // Doesn't match boundary
-                            }
-                        } else {
-                            if (propertyValue.equals(boundaryValue)) {
-                                group1Grades.add(mainCourseGrade); // Matches boundary
-                            } else {
-                                group2Grades.add(mainCourseGrade); // Doesn't match boundary
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        calculateAndPrint(group1Grades, "Group 1 (Matches Property or Boundary)");
-        calculateAndPrint(group2Grades, "Group 2 (Doesn't Match Property or Boundary)");
-        double mean1 = calculateAverage(group1Grades);
-        double mean2 = calculateAverage(group2Grades);
-        System.out.printf(" - Average difference: %.2f\n", Math.abs(mean1 - mean2));
-    }
-
-    // Method to compare one course to all other courses based on property and boundary value
-    public void compareCourseToAllOtherCourses(String mainCourseName, String property, Object boundaryValue) {
-        Course mainCourse = findCourseByName(mainCourseName);
-
-        if (mainCourse == null) {
-            System.out.println("Course not found: " + mainCourseName);
-            return;
-        }
-
-        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
-        List<Double> mainCourseGrades = new ArrayList<>();
-
-        // Get grades for the main course, filtered by property and boundary value
-        for (CurrentStudentRecord student : studentRecords.values()) {
-            List<Double> grades = student.getCourseGrades();
-            int mainCourseIndex = mainCourse.getColumnIndex();
-            if (mainCourseIndex >= 0 && mainCourseIndex < grades.size()) {
-                Double mainCourseGrade = grades.get(mainCourseIndex);
-                if (mainCourseGrade != null && matchesProperty(student, property, boundaryValue)) {
-                    mainCourseGrades.add(mainCourseGrade);
-                }
-            }
-        }
-
-        // Now, compare with all other courses
-        for (Course otherCourse : courses) {
-            if (!otherCourse.equals(mainCourse)) {
-                List<Double> otherCourseGrades = new ArrayList<>();
-                for (CurrentStudentRecord student : studentRecords.values()) {
-                    List<Double> grades = student.getCourseGrades();
-                    int otherCourseIndex = otherCourse.getColumnIndex();
-                    if (otherCourseIndex >= 0 && otherCourseIndex < grades.size()) {
-                        Double otherCourseGrade = grades.get(otherCourseIndex);
-                        if (otherCourseGrade != null && matchesProperty(student, property, boundaryValue)) {
-                            otherCourseGrades.add(otherCourseGrade);
-                        }
-                    }
-                }
-
-                displayComparison(mainCourseName, mainCourseGrades, otherCourse.getName(), otherCourseGrades);
-            }
-        }
-    }
-
-    // Method to find the best property and boundary value to predict grades for a specific course
-    public void findBestPropertyForCourse(String courseName) {
-        Course targetCourse = findCourseByName(courseName);
-        if (targetCourse == null) {
-            System.out.println("Course not found: " + courseName);
-            return;
-        }
-
-        // Check if there are any grades for this course
-        if (!courseHasGrades(targetCourse)) {
-            System.out.println("No students have completed the course: " + courseName);
-            return; // Exit the method since no variance reduction can be calculated
-        }
-
-        String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
-                "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
-
-        double overallVariance = calculateOverallVariance(targetCourse);
-        double bestVarianceReduction = -1;
-        List<Map<String, Object>> bestProperties = new ArrayList<>();
-
-        for (String property : properties) {
-            List<Object> boundaryValues = getBoundaryValuesForProperty(property);
-
-            for (Object boundaryValue : boundaryValues) {
-                double varianceReduction = overallVariance - calculateVarianceReduction(targetCourse, property, boundaryValue);
-                System.out.printf("Property: %s | Boundary: %s | Variance Reduction: %f\n", property, boundaryValue, varianceReduction);
-
-                if (varianceReduction > bestVarianceReduction) {
-                    bestVarianceReduction = varianceReduction;
-                    bestProperties.clear();
-                    Map<String, Object> bestPropertyData = new HashMap<>();
-                    bestPropertyData.put("Property", property);
-                    bestPropertyData.put("Boundary", boundaryValue);
-                    bestProperties.add(bestPropertyData);
-                } else if (varianceReduction == bestVarianceReduction) {
-                    Map<String, Object> bestPropertyData = new HashMap<>();
-                    bestPropertyData.put("Property", property);
-                    bestPropertyData.put("Boundary", boundaryValue);
-                    bestProperties.add(bestPropertyData);
-                }
-            }
-        }
-
-        if (!bestProperties.isEmpty()) {
-            System.out.printf("\nBest properties for predicting the grade (Variance Reduction: %f):\n", bestVarianceReduction);
-            System.out.println("This is the map with the best properties: " + bestProperties);
-            for (Map<String, Object> propertyData : bestProperties) {
-                System.out.printf(" - Property: %s | Boundary: %s\n", propertyData.get("Property"), propertyData.get("Boundary"));
-            }
-        } else {
-            System.out.println("No suitable property and boundary found for variance reduction.");
-        }
     }
 
     public void findBestPropertyOrCombinationForCourse(String courseName) {
@@ -269,7 +60,7 @@ public class PredictionManager {
 
         if (bestProperties != null) {
             System.out.printf("Best property/combination for predicting grade in course %s: %s with boundary %s, Variance Reduction: %.6f\n",
-                    courseName, bestProperties, bestBoundary, bestVarianceReduction);
+                    courseName, bestProperties, bestBoundary, overallVariance - bestVarianceReduction);
         } else {
             System.out.println("No suitable property/combination found for variance reduction.");
         }
@@ -538,7 +329,6 @@ public class PredictionManager {
             }
         }
 
-        // For numeric properties, calculate a few potential boundary values (e.g., min, max, average)
         if (isNumericProperty(property)) {
             List<Double> numericValues = new ArrayList<>();
             for (Object value : uniqueValues) {
