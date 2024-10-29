@@ -369,7 +369,8 @@ public class PredictionManager {
                 }
             }
         }
-
+        System.out.println(" Group 1 size : " + group1Grades.size());
+        System.out.println(" Group 2 size : " + group2Grades.size());
         double overallVariance = calculateOverallVariance(course);
         double group1Variance = calculateVariance(group1Grades, calculateAverage(group1Grades));
         double group2Variance = calculateVariance(group2Grades, calculateAverage(group2Grades));
