@@ -359,6 +359,7 @@ public class PredictionManager {
 
                         if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
                             group1Grades.add(grade); // Matches boundary
+                            System.out.println(group1Grades);
                         } else {
                             group2Grades.add(grade); // Doesn't match boundary
                         }
