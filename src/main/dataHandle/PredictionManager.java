@@ -225,6 +225,56 @@ public class PredictionManager {
         }
     }
 
+    public void findBestPropertyOrCombinationForCourse(String courseName) {
+        Course targetCourse = findCourseByName(courseName);
+        if (targetCourse == null) {
+            System.out.println("Course not found: " + courseName);
+            return;
+        }
+
+        if (!courseHasGrades(targetCourse)) {
+            System.out.println("No students have completed the course: " + courseName);
+            return;
+        }
+
+        String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate",
+                "Plasma Conductivity Quotient", "Telepathic Synchronisation Index",
+                "Aetheric Resonance Capacity"};
+
+        double overallVariance = calculateOverallVariance(targetCourse);
+        double bestVarianceReduction = -1;
+        List<String> bestProperties = null;
+        Object bestBoundary = null;
+
+        // Generate combinations of properties
+        List<List<String>> propertyCombinations = generatePropertyCombinations(properties, 2); // Try single and pair combinations
+
+        for (List<String> combination : propertyCombinations) {
+            // Get possible boundary values for each property in the combination
+            List<Object> boundaryValues = new ArrayList<>();
+            for (String property : combination) {
+                boundaryValues.addAll(getBoundaryValuesForProperty(property));
+            }
+
+            for (Object boundaryValue : boundaryValues) {
+                double combinedVarianceReduction = calculateCombinedVarianceReduction(targetCourse, combination, boundaryValue);
+
+                if (combinedVarianceReduction > bestVarianceReduction) {
+                    bestVarianceReduction = combinedVarianceReduction;
+                    bestProperties = new ArrayList<>(combination);
+                    bestBoundary = boundaryValue;
+                }
+            }
+        }
+
+        if (bestProperties != null) {
+            System.out.printf("Best property/combination for predicting grade in course %s: %s with boundary %s, Variance Reduction: %.6f\n",
+                    courseName, bestProperties, bestBoundary, bestVarianceReduction);
+        } else {
+            System.out.println("No suitable property/combination found for variance reduction.");
+        }
+    }
+
 
     public void predictGradeForUncompletedCourse(String uncompletedCourseName, int studentID) {
         Course uncompletedCourse = findCourseByName(uncompletedCourseName);
@@ -273,6 +323,69 @@ public class PredictionManager {
 
         System.out.printf("Predicted grade for student %d in course %s (based on similar course %s): %.2f\n",
                 studentID, uncompletedCourseName, mostSimilarCourse.getName(), predictedGrade);
+    }
+
+    private double calculateCombinedVarianceReduction(Course course, List<String> properties, Object boundaryValue) {
+        List<Double> group1Grades = new ArrayList<>();
+        List<Double> group2Grades = new ArrayList<>();
+        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+
+        for (CurrentStudentRecord student : studentRecords.values()) {
+            List<Double> grades = student.getCourseGrades();
+            int courseIndex = course.getColumnIndex();
+            if (courseIndex >= 0 && courseIndex < grades.size()) {
+                Double grade = grades.get(courseIndex);
+                if (grade != null) {
+                    StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
+                    if (infoRecord != null) {
+                        boolean matchesBoundary = true;
+                        for (String property : properties) {
+                            Object propertyValue = getStudentProperty(infoRecord, property);
+                            if (!comparePropertyToBoundary(propertyValue, boundaryValue)) {
+                                matchesBoundary = false;
+                                break;
+                            }
+                        }
+
+                        if (matchesBoundary) {
+                            group1Grades.add(grade);
+                        } else {
+                            group2Grades.add(grade);
+                        }
+                    }
+                }
+            }
+        }
+
+        double group1Variance = calculateVariance(group1Grades, calculateAverage(group1Grades));
+        double group2Variance = calculateVariance(group2Grades, calculateAverage(group2Grades));
+        double weightedVariance = (group1Grades.size() * group1Variance + group2Grades.size() * group2Variance) /
+                (group1Grades.size() + group2Grades.size());
+
+        return calculateOverallVariance(course) - weightedVariance;
+    }
+
+    // Helper function to generate combinations of properties
+    private List<List<String>> generatePropertyCombinations(String[] properties, int maxCombinationLength) {
+        List<List<String>> combinations = new ArrayList<>();
+        for (int i = 1; i <= maxCombinationLength; i++) {
+            combinations.addAll(combine(properties, i, 0, new ArrayList<>()));
+        }
+        return combinations;
+    }
+
+    private List<List<String>> combine(String[] properties, int length, int start, List<String> current) {
+        List<List<String>> result = new ArrayList<>();
+        if (current.size() == length) {
+            result.add(new ArrayList<>(current));
+            return result;
+        }
+        for (int i = start; i < properties.length; i++) {
+            current.add(properties[i]);
+            result.addAll(combine(properties, length, i + 1, current));
+            current.remove(current.size() - 1);
+        }
+        return result;
     }
 
     // Method to find the best property and boundary value to predict grades for a specific course
@@ -425,20 +538,16 @@ public class PredictionManager {
             }
         }
 
-        // For numeric properties, add all unique values as doubles
+        // For numeric properties, calculate a few potential boundary values (e.g., min, max, average)
         if (isNumericProperty(property)) {
             List<Double> numericValues = new ArrayList<>();
             for (Object value : uniqueValues) {
-                try {
-                    numericValues.add(Double.parseDouble(value.toString()));  // Convert property values to double
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid numeric format: " + value);  // Handle potential parse errors
-                }
+                numericValues.add(Double.parseDouble(value.toString()));  // Convert property values to double
             }
-            boundaryValues.addAll(numericValues);
-        } else {
-            // For categorical properties, just add all unique values
-            boundaryValues.addAll(uniqueValues);
+
+            if (!numericValues.isEmpty()) {
+                boundaryValues.addAll(uniqueValues);
+            }
         }
 
         return boundaryValues;
