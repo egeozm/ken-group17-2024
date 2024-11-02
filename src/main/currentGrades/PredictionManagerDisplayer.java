@@ -14,6 +14,7 @@ public class PredictionManagerDisplayer {
         List<Course> courses = courseManager.getCourseRecords();
         SimilarCourses similarCourses = new SimilarCourses(courseManager);
         PredictionManager predictionManager = new PredictionManager(currentStudentManager, courses, studentInfoManager, similarCourses);
+        PredictionManager2 predictionManager2 = new PredictionManager2(currentStudentManager, courses, studentInfoManager, similarCourses);
         //predictionManager.compareAverageGradeForProperty("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "B");
         //predictionManager.compareAverageGradeUsingOtherCourses("Vortex Quantum Mechanics", "Cybernetic Ethics", "Telepathic Synchronisation Index", "B");
         //predictionManager.compareCourseToAllOtherCourses("Vortex Quantum Mechanics", "Telepathic Synchronisation Index", "A");
@@ -22,7 +23,8 @@ public class PredictionManagerDisplayer {
 //        predictionManager.findBestPropertyForCourse("Transdimensional Navigation");
        System.out.println("AAAAAAAAAA");
         //predictionManager.predictGradeForUncompletedCourse("Vortex Quantum Mechanics", 212055);
-        predictionManager.findBestPropertyOrCombinationForCourse("Vortex Quantum Mechanics");
+      //  predictionManager.findBestPropertyOrCombinationForCourse("Vortex Quantum Mechanics");
+        predictionManager2.compareAverageGradeForProperty("ExoGenetics Evolution","Neuro-Synaptic Interface Level", "medium");
 
     }
 
