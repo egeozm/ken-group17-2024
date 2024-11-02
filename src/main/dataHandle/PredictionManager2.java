@@ -62,6 +62,8 @@ public class PredictionManager2{
                 }
             }
         }
+        List<Double> combinedGrades = new ArrayList<>(group1Grades);
+        combinedGrades.addAll(group2Grades);
         calculateAndPrint(group1Grades, "\nGroup 1 (Matches Boundary or Above)");
         calculateAndPrint(group2Grades, "Group 2 (Below Boundary or Not Matching)");
         System.out.printf("Comparison between Group 1 and Group 2 : \n");
@@ -69,9 +71,11 @@ public class PredictionManager2{
         double mean2 = calculateAverage(group2Grades);
         System.out.printf(" - Average difference: %.2f\n", Math.abs(mean1 - mean2));
         System.out.printf(" - Std Dev difference: %.2f\n", Math.abs(calculateStandardDeviation(group1Grades, mean1) - calculateStandardDeviation(group2Grades, mean2)));
-        System.out.println(group1Grades);
+        //System.out.println(group1Grades);
+        //System.out.println(group2Grades);
+        //System.out.println(combinedGrades);
         System.out.println("NEXT METHOD");
-        System.out.println(calculateVarianceReduction(group1Grades, group2Grades));
+        System.out.println(calculateVarianceReduction2(combinedGrades,group1Grades,group2Grades));
         
 
     }
@@ -169,6 +173,43 @@ public class PredictionManager2{
         
         return combinedVariance - weightedVariance;
     }
+
+
+
+
+
+    private static double calculateOverallVariance(List<Double> grades){
+        double pOverall = (double) getStudentsPass(grades).size()/grades.size();
+        double varianceOverall = pOverall * (1-pOverall);
+        return varianceOverall;
+    }
+    private static double calculateStudentsVariance(List<Double> grades,List<Double> passedStudents){
+        double p = passedStudents.size()/grades.size();
+        double studentsVariance = p * (1 - p);
+        return studentsVariance;
+    }
+    private static double calculateWeightedVariance(List<Double>grades, List<Double>gradesWith, List<Double>gradesWithout){
+        double weightedVariance = (gradesWith.size()/grades.size()) * calculateStudentsVariance(gradesWith,getStudentsPass(gradesWith)) + (gradesWithout.size()/grades.size()) * calculateStudentsVariance(gradesWithout, getStudentsPass(gradesWithout));
+        return weightedVariance;
+    }
+    private static double calculateVarianceReduction2(List<Double>grades, List<Double>gradesWith, List<Double>gradesWithout){
+        double varianceReduction = calculateOverallVariance(grades) - calculateWeightedVariance(grades, gradesWith, gradesWithout);
+        return varianceReduction;
+    }
+    private static List<Double> getStudentsPass(List<Double> grades){
+        List<Double> studentsPass = new ArrayList<>();
+        for (double grade : grades){
+            if (grade >= 6){
+                studentsPass.add(grade);
+            }
+        }
+        return studentsPass;
+    }
+
+
+
+
+
     private static double calculateVariance(List<Double> grades) {
         double mean = calculateMean(grades);
         double variance = 0.0;
@@ -188,5 +229,6 @@ public class PredictionManager2{
         }
         return sum / grades.size();
     }
+     
 
 }
