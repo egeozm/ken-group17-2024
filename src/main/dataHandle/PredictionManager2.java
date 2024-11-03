@@ -1,10 +1,8 @@
 package src.main.dataHandle;
 
-import src.main.dataHandle.SimilarCourses;
-
 import java.util.*;
 
-public class PredictionManager2{
+public class PredictionManager2 {
     private final CurrentStudentManager studentManager;
     private final List<Course> courses;
     private final StudentInfoManager studentInfoManager;
@@ -47,7 +45,7 @@ public class PredictionManager2{
                         // For numeric properties
                         if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
                             group1Grades.add(grade); // Above boundary or in first group
-                            
+
                         } else {
                             group2Grades.add(grade); // Below boundary or in second group
                         }
@@ -75,10 +73,11 @@ public class PredictionManager2{
         //System.out.println(group2Grades);
         //System.out.println(combinedGrades);
         System.out.println("NEXT METHOD");
-        System.out.println(calculateVarianceReduction2(combinedGrades,group1Grades,group2Grades));
-        
+        System.out.println(calculateVarianceReduction2(combinedGrades, group1Grades, group2Grades));
+
 
     }
+
     public Course findCourseByName(String courseName) {
         for (Course course : courses) {
             if (course.getName().equals(courseName)) {
@@ -87,6 +86,7 @@ public class PredictionManager2{
         }
         return null;
     }
+
     private String getStudentProperty(StudentInfoRecord student, String property) {
         return switch (property) {
             case "Neuro-Synaptic Interface Level" -> student.getNeuroSynapticInterfaceLevel();
@@ -97,15 +97,18 @@ public class PredictionManager2{
             default -> "Unknown";
         };
     }
+
     private boolean isNumericProperty(String property) {
         return property.equals("Plasma Conductivity Quotient") || property.equals("Chrono-Adaptation Rate") ||
                 property.equals("Aetheric Resonance Capacity");
     }
+
     private void calculateAndPrint(List<Double> grades, String label) {
         double average = calculateAverage(grades);
         double stdDev = calculateStandardDeviation(grades, average);
         System.out.printf("%s | Average Grade: %.2f | Std Dev: %.2f | Number of Students: %d\n", label, average, stdDev, grades.size());
     }
+
     private double calculateAverage(List<Double> grades) {
         double sum = 0;
         for (Double grade : grades) {
@@ -113,6 +116,7 @@ public class PredictionManager2{
         }
         return (!grades.isEmpty()) ? sum / grades.size() : 0.0;
     }
+
     private double calculateStandardDeviation(List<Double> grades, double mean) {
         double sum = 0;
         int count = 0;
@@ -124,6 +128,7 @@ public class PredictionManager2{
         }
         return (!grades.isEmpty()) ? Math.sqrt(sum / count) : 0;
     }
+
     private boolean comparePropertyToBoundary(Object propertyValue, Object boundaryValue) {
         // For categorical properties, check for equality
         if (propertyValue instanceof String && boundaryValue instanceof String) {
@@ -153,33 +158,34 @@ public class PredictionManager2{
     }
 
 
-
-
-
     //New methods to calculate variance reduction like in the discrod ss example
-    private static double calculateOverallVariance(List<Double> grades){
-        double pOverall = (double) getStudentsPass(grades).size()/grades.size();
-        double varianceOverall = pOverall * (1-pOverall);
+    private static double calculateOverallVariance(List<Double> grades) {
+        double pOverall = (double) getStudentsPass(grades).size() / grades.size();
+        double varianceOverall = pOverall * (1 - pOverall);
         return varianceOverall;
     }
-    private static double calculateStudentsVariance(List<Double> grades,List<Double> passedStudents){
-        double p = passedStudents.size()/grades.size();
+
+    private static double calculateStudentsVariance(List<Double> grades, List<Double> passedStudents) {
+        double p = passedStudents.size() / grades.size();
         double studentsVariance = p * (1 - p);
         return studentsVariance;
     }
-    private static double calculateWeightedVariance(List<Double>grades, List<Double>gradesWith, List<Double>gradesWithout){
-        double weightedVariance = (gradesWith.size()/grades.size()) * calculateStudentsVariance(gradesWith,getStudentsPass(gradesWith)) + (gradesWithout.size()/grades.size()) * calculateStudentsVariance(gradesWithout, getStudentsPass(gradesWithout));
+
+    private static double calculateWeightedVariance(List<Double> grades, List<Double> gradesWith, List<Double> gradesWithout) {
+        double weightedVariance = (gradesWith.size() / grades.size()) * calculateStudentsVariance(gradesWith, getStudentsPass(gradesWith)) + (gradesWithout.size() / grades.size()) * calculateStudentsVariance(gradesWithout, getStudentsPass(gradesWithout));
         return weightedVariance;
     }
-    private static double calculateVarianceReduction2(List<Double>grades, List<Double>gradesWith, List<Double>gradesWithout){
+
+    private static double calculateVarianceReduction2(List<Double> grades, List<Double> gradesWith, List<Double> gradesWithout) {
         double varianceReduction = calculateOverallVariance(grades) - calculateWeightedVariance(grades, gradesWith, gradesWithout);
         return varianceReduction;
     }
+
     //It returns list with students that pass the course with property/without property.
-    private static List<Double> getStudentsPass(List<Double> grades){
+    private static List<Double> getStudentsPass(List<Double> grades) {
         List<Double> studentsPass = new ArrayList<>();
-        for (double grade : grades){
-            if (grade >= 6){
+        for (double grade : grades) {
+            if (grade >= 6) {
                 studentsPass.add(grade);
             }
         }
@@ -197,11 +203,14 @@ public class PredictionManager2{
                 }
             }
             if (allGradeNull) {
+                System.out.println("Unstarted course found: " + course.getName());
                 notStartedCourses.add(course);
             }
         }
+        System.out.println("Total unstarted courses found: " + notStartedCourses.size());
         return notStartedCourses;
     }
+
     private List<Object> getBoundaryValuesForProperty(String property) {
         List<Object> boundaryValues = new ArrayList<>();
         List<StudentInfoRecord> studentRecords = studentInfoManager.getAllStudents();  // Now it's a list, not a map
@@ -229,32 +238,35 @@ public class PredictionManager2{
         return boundaryValues;
     }
 
-    public void findBestPropertyForUncomplitedCourses(List<Course> courses){
+    public void findBestPropertyForUncomplitedCourses(List<Course> courses) {
 
         //It should get notStartedCourses and similarCourses to not started ones.
         //Size of list with notStartedCourses is always 0 so I think that is why this does not work.
 
-        List<Course> notStartedCourses = new ArrayList<>();
-        notStartedCourses = getNotStartedCourses(courses);
+        List<Course> notStartedCourses = getNotStartedCourses(courses);
+        if (notStartedCourses.isEmpty()) {
+            System.out.println("No unstarted courses found.");
+            return;
+        }
         List<Course> similarCourses = new ArrayList<>();
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
-        
-        for (Course notStartedCourse : notStartedCourses){
+
+        for (Course notStartedCourse : notStartedCourses) {
             similarCourses.add(this.similarCourses.findMostSimilarCourse(notStartedCourse));
         }
 
         //Loop here tries to calculate and print lowest variance reduction.
         //But it does not work because list of similarCourses is empty since notStartedCourses list is empty as well.(I have no idea why) 
 
-        for (Course similarCourse : similarCourses){
-            for (String property : properties){
+        for (Course similarCourse : similarCourses) {
+            for (String property : properties) {
                 List<Object> boundaryValues = getBoundaryValuesForProperty(property);
                 List<Double> group1Grades = new ArrayList<>();
                 List<Double> group2Grades = new ArrayList<>();
                 List<Double> grades = new ArrayList<>();
-                for(Object boundaryValue : boundaryValues){
+                for (Object boundaryValue : boundaryValues) {
                     for (CurrentStudentRecord student : studentRecords.values()) {
                         grades = student.getCourseGrades();
                         int courseIndex = similarCourse.getColumnIndex();
@@ -272,7 +284,7 @@ public class PredictionManager2{
                                     // For numeric properties
                                     if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
                                         group1Grades.add(grade); // Above boundary or in first group
-                                        
+
                                     } else {
                                         group2Grades.add(grade); // Below boundary or in second group
                                     }
@@ -295,13 +307,11 @@ public class PredictionManager2{
                     lowestVarianceReduction = calculateVarianceReduction2(grades, group1Grades, group2Grades);
 
                 }
-                System.out.println("Best Variance Reduction: " + property + " || " + "Course: " + similarCourse);  
+                System.out.println("Best Variance Reduction: " + property + " || " + "Course: " + similarCourse);
             }
-        }  
+        }
 
     }
-        
-        
 
 
 }

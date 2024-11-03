@@ -9,7 +9,6 @@ public class SimilarCourses {
 
     public SimilarCourses(CourseManager courseManager) {
         this.courseManager = courseManager;
-        courseManager.loadGraduateGrades();
     }
 
     // Method to find and return the most similar course to the given course
