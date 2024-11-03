@@ -9,7 +9,7 @@ public class CourseCompletionEstimator {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadCurrentGrades();
-        List<Course> courses = courseManager.getCourseRecords();
+        List<Course> courses = courseManager.getCurrentCourses();
 
         CurrentStudentManager currentStudentManager = new CurrentStudentManager();
 

@@ -14,7 +14,7 @@ public class GraduatedCumLaudeStudentsDisplayer {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();  // Load graduate grades from CSV
 
-        List<Course> courses = courseManager.getCourseRecords();
+        List<Course> courses = courseManager.getGraduatedCourses();
         List<GraduatedStudentRecord> studentRecords = new ArrayList<>();
 
         // Assuming the first column of each course contains the student ID

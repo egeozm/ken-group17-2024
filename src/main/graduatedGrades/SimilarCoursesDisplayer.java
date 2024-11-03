@@ -14,14 +14,14 @@ public class SimilarCoursesDisplayer {
 
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
-        SimilarCourses similarCoursesFinder = new SimilarCourses(courseManager);
+        List<Course> graduatedCourses = courseManager.getGraduatedCourses();
+        SimilarCourses similarCoursesFinder = new SimilarCourses(graduatedCourses);
         double similarityBaseValue = 0.0;
         double highestSimilarity = 0.0;
         Course courseWithHighestSimilarity1 = null;
         Course courseWithHighestSimilarity2 = null;
 
-        List<Course> courses = courseManager.getCourseRecords();
-        for (Course targetCourse : courses) {
+        for (Course targetCourse : graduatedCourses) {
             System.out.printf("\nSimilarities for course '%s':\n", targetCourse.getName());
 
             // List to store course similarities

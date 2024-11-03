@@ -11,7 +11,7 @@ public class GradeSpreadDisplayer {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
-        List<Course> courses = courseManager.getCourseRecords();
+        List<Course> courses = courseManager.getGraduatedCourses();
 
         // Iterate through each course and use the preloaded grades
         for (Course course : courses) {

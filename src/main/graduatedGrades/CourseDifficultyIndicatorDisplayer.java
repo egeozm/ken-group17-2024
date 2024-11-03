@@ -10,7 +10,7 @@ public class CourseDifficultyIndicatorDisplayer {
     public static void main(String[] args) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
-        List<Course> sortedCourses = courseManager.getCourseRecords();
+        List<Course> sortedCourses = courseManager.getGraduatedCourses();
         // Changing their position in the list not creating anything new.
         sortedCourses.sort(Comparator.comparingDouble(Course::getAverageGrade));
         // we did not use std dev. because there are no 2 courses that have the same average grade.

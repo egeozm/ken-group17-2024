@@ -5,19 +5,19 @@ import java.util.List;
 
 public class SimilarCourses {
 
-    private final CourseManager courseManager;
+    private final List<Course> graduatedCourses;
 
-    public SimilarCourses(CourseManager courseManager) {
-        this.courseManager = courseManager;
+    public SimilarCourses(List<Course> graduatedCourses) {
+        this.graduatedCourses = graduatedCourses;
+
     }
 
     // Method to find and return the most similar course to the given course
     public Course findMostSimilarCourse(Course targetCourse) {
-        List<Course> courses = courseManager.getCourseRecords();
         double highestSimilarity = 0;
         Course mostSimilarCourse = null;
 
-        for (Course course : courses) {
+        for (Course course : graduatedCourses) {
             if (!course.equals(targetCourse)) {
                 double similarity = pearsonCorrelation(targetCourse.getGrades(), course.getGrades());
 
@@ -33,10 +33,9 @@ public class SimilarCourses {
 
     // Method to return a list of courses that are similar to the target course
     public List<Course> findSimilarCourses(Course targetCourse, double threshold) {
-        List<Course> courses = courseManager.getCourseRecords();
         List<Course> similarCourses = new ArrayList<>();
 
-        for (Course course : courses) {
+        for (Course course : graduatedCourses) {
             if (!course.equals(targetCourse)) {
                 double similarity = pearsonCorrelation(targetCourse.getGrades(), course.getGrades());
 

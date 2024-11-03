@@ -16,7 +16,7 @@ CurrentStudentManager currentStudentManager = new CurrentStudentManager();
         StudentInfoManager studentInfoManager = new StudentInfoManager();
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadCurrentGrades();
-        List<Course> courses = courseManager.getCourseRecords();
+        List<Course> courses = courseManager.getGraduatedCourses();
         CoursePerformanceComparator comparator = new CoursePerformanceComparator(currentStudentManager, courses);
         comparator.comparePerformanceAcrossCourses("Vortex Quantum Mechanics", "Aether Resonance");
 }}

@@ -248,19 +248,22 @@ public class PredictionManager2 {
             System.out.println("No unstarted courses found.");
             return;
         }
-        List<Course> similarCourses = new ArrayList<>();
+        List<Course> similarCoursesList = new ArrayList<>();
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
 
         for (Course notStartedCourse : notStartedCourses) {
-            similarCourses.add(this.similarCourses.findMostSimilarCourse(notStartedCourse));
+            Course mostSimilarCourse = similarCourses.findMostSimilarCourse(notStartedCourse);
+            if (mostSimilarCourse != null) {
+                similarCoursesList.add(mostSimilarCourse);
+            }
         }
 
         //Loop here tries to calculate and print lowest variance reduction.
-        //But it does not work because list of similarCourses is empty since notStartedCourses list is empty as well.(I have no idea why) 
 
-        for (Course similarCourse : similarCourses) {
+        for (Course similarCourse : similarCoursesList) {
             for (String property : properties) {
                 List<Object> boundaryValues = getBoundaryValuesForProperty(property);
                 List<Double> group1Grades = new ArrayList<>();

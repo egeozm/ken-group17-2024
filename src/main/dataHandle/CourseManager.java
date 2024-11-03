@@ -5,10 +5,13 @@ import java.util.List;
 
 public class CourseManager {
     private static CourseManager instance;
-    private final List<Course> courses;
+    private final List<Course> currentCourses;
+    private final List<Course> graduatedCourses;
+
 
     private CourseManager() {
-        courses = new ArrayList<>();
+        currentCourses = new ArrayList<>();
+        graduatedCourses = new ArrayList<>();
     }
 
     // Singleton method to get the single instance of CourseManager
@@ -20,9 +23,9 @@ public class CourseManager {
     }
 
     // Method to load courses from a specific CSV file
-    public void loadCoursesFromCsv(String csvFilePath) {
+    public void loadCoursesFromCsv(String csvFilePath, List<Course> targetCourses) {
         // Clear the existing courses if switching between datasets
-        courses.clear();
+        targetCourses.clear();
 
         String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
 
@@ -54,19 +57,19 @@ public class CourseManager {
                 double standardDeviation = calculateStandardDeviation(grades, averageGrade);
                 double mostCommonGrade = calculateMostCommonGrade(grades);
 
-                courses.add(new Course(courseName, i - 1, averageGrade, standardDeviation, grades, mostCommonGrade));
+                targetCourses.add(new Course(courseName, i - 1, averageGrade, standardDeviation, grades, mostCommonGrade));
             }
         }
     }
 
     // Switch to load Current Grades
     public void loadCurrentGrades() {
-        loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv");
+        loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv", currentCourses);
     }
 
     // Switch to load Graduate Grades
     public void loadGraduateGrades() {
-        loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv");
+        loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv", graduatedCourses);
     }
 
     // Method to calculate the standard deviation for a specific course column
@@ -111,8 +114,12 @@ public class CourseManager {
         return mostCommonGrade;
     }
 
-    // Getter for course records
-    public List<Course> getCourseRecords() {
-        return courses;
+    // Getters for course records
+    public List<Course> getCurrentCourses() {
+        return currentCourses;
+    }
+
+    public List<Course> getGraduatedCourses() {
+        return graduatedCourses;
     }
 }
