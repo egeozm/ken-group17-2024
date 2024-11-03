@@ -151,28 +151,7 @@ public class PredictionManager2{
         System.out.println("Error: Incompatible types for comparison: " + propertyValue + " and " + boundaryValue);
         return false;
     }
-    public static double calculateVarianceReduction(List<Double> group1Grades, List<Double> group2Grades) {
-        // Step 1: Merge group1Grades and group2Grades into a single combined list
-        List<Double> combinedGrades = new ArrayList<>(group1Grades);
-        combinedGrades.addAll(group2Grades);
-        System.out.println("THE TOTAL SIZE IS: " + combinedGrades.size());
-        // Step 2: Calculate variance of the combined list
-        double combinedVariance = calculateVariance(combinedGrades);
-        
-        // Step 3: Calculate variance of only group1Grades
-        double group1Variance = calculateVariance(group1Grades);
-        
-        // Step 4: Calculate variance of only group2Grades
-        double group2Variance = calculateVariance(group2Grades);
 
-        // Step 5: Calculate the weighted variance reduction
-        double totalSize = combinedGrades.size();
-        double weightGroup1 = (double) group1Grades.size() / totalSize;
-        double weightGroup2 = (double) group2Grades.size() / totalSize;
-        double weightedVariance = weightGroup1 * group1Variance + weightGroup2 * group2Variance;
-        
-        return combinedVariance - weightedVariance;
-    }
 
 
 
@@ -207,29 +186,6 @@ public class PredictionManager2{
         return studentsPass;
     }
 
-
-
-
-
-    private static double calculateVariance(List<Double> grades) {
-        double mean = calculateMean(grades);
-        double variance = 0.0;
-        
-        // Calculate the variance by finding the squared difference from the mean for each grade
-        for (double grade : grades) {
-            variance += Math.pow(grade - mean, 2);
-        }
-        return variance / grades.size();
-    }
-    private static double calculateMean(List<Double> grades) {
-        double sum = 0.0;
-        
-        // Calculate the sum of all grades
-        for (double grade : grades) {
-            sum += grade;
-        }
-        return sum / grades.size();
-    }
     private static List<Course> getNotStartedCourses(List<Course> courses) {
         List<Course> notStartedCourses = new ArrayList<>();
         for (Course course : courses) {
