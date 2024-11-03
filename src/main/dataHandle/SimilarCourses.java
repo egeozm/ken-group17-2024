@@ -18,14 +18,22 @@ public class SimilarCourses {
         Course mostSimilarCourse = null;
 
         for (Course course : graduatedCourses) {
-            if (!course.equals(targetCourse)) {
+            if (!course.getName().equals(targetCourse.getName())) {
                 double similarity = pearsonCorrelation(targetCourse.getGrades(), course.getGrades());
+                System.out.printf("Comparing %s with %s: Similarity = %.4f\n", targetCourse.getName(), course.getName(), similarity);
+
 
                 if (similarity > highestSimilarity) {
                     highestSimilarity = similarity;
                     mostSimilarCourse = course;
                 }
             }
+        }
+        if (mostSimilarCourse == null) {
+            System.out.println("No similar course found for: " + targetCourse.getName());
+        } else {
+            System.out.printf("Most similar course to %s is %s with similarity %.4f\n",
+                    targetCourse.getName(), mostSimilarCourse.getName(), highestSimilarity);
         }
 
         return mostSimilarCourse;

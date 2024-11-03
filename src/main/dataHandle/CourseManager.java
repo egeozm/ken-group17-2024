@@ -23,9 +23,10 @@ public class CourseManager {
     }
 
     // Method to load courses from a specific CSV file
-    public void loadCoursesFromCsv(String csvFilePath, List<Course> targetCourses) {
+    public void loadCoursesFromCsv(String csvFilePath, boolean isGraduated) {
         // Clear the existing courses if switching between datasets
-        targetCourses.clear();
+        List<Course> courseList = isGraduated ? graduatedCourses : currentCourses;
+        courseList.clear();
 
         String[][] dataSet = TwoDimensionalArray.readCsvInto2DArray(csvFilePath);
 
@@ -57,19 +58,19 @@ public class CourseManager {
                 double standardDeviation = calculateStandardDeviation(grades, averageGrade);
                 double mostCommonGrade = calculateMostCommonGrade(grades);
 
-                targetCourses.add(new Course(courseName, i - 1, averageGrade, standardDeviation, grades, mostCommonGrade));
+                courseList.add(new Course(courseName, i - 1, averageGrade, standardDeviation, grades, mostCommonGrade));
             }
         }
     }
 
     // Switch to load Current Grades
     public void loadCurrentGrades() {
-        loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv", currentCourses);
+        loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv", false);
     }
 
     // Switch to load Graduate Grades
     public void loadGraduateGrades() {
-        loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv", graduatedCourses);
+        loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv", true);
     }
 
     // Method to calculate the standard deviation for a specific course column
