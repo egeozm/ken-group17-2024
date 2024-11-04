@@ -73,7 +73,7 @@ public class PredictionManager2 {
         //System.out.println(group2Grades);
         //System.out.println(combinedGrades);
         System.out.println("NEXT METHOD");
-        System.out.println(calculateVarianceReduction2(combinedGrades, group1Grades, group2Grades));
+        System.out.println(calculateVarianceReduction(combinedGrades, group1Grades, group2Grades));
 
 
     }
@@ -158,41 +158,37 @@ public class PredictionManager2 {
     }
 
 
-    //New methods to calculate variance reduction like in the discrod ss example
-    private static double calculateOverallVariance(List<Double> grades) {
-        double pOverall = (double) getStudentsPass(grades).size() / grades.size();
-        double varianceOverall = pOverall * (1 - pOverall);
-        return varianceOverall;
+    private double calculateOverallVariance(List<Double> grades) {
+        int totalStudents = grades.size();
+        int totalPass = (int) grades.stream().filter(grade -> grade != null && grade >= 6).count();
+        double pOverall = (double) totalPass / totalStudents;
+        return pOverall * (1 - pOverall);
     }
 
-    private static double calculateStudentsVariance(List<Double> grades, List<Double> passedStudents) {
-        if (grades.isEmpty()) return 0;
-        double p = passedStudents.size() / grades.size();
-        double studentsVariance = p * (1 - p);
-        return studentsVariance;
+    private double calculateGroupVariance(List<Double> groupGrades) {
+        int totalStudentsInGroup = groupGrades.size();
+        int totalPassInGroup = (int) groupGrades.stream().filter(grade -> grade != null && grade >= 6).count();
+        double pGroup = (double) totalPassInGroup / totalStudentsInGroup;
+        return pGroup * (1 - pGroup);
     }
 
-    private static double calculateWeightedVariance(List<Double> grades, List<Double> gradesWith, List<Double> gradesWithout) {
-        if (grades.isEmpty()) return 0;
-        double weightedVariance = (gradesWith.size() / grades.size()) * calculateStudentsVariance(gradesWith, getStudentsPass(gradesWith)) + (gradesWithout.size() / grades.size()) * calculateStudentsVariance(gradesWithout, getStudentsPass(gradesWithout));
+    private double calculateWeightedVariance(List<Double> grades, List<Double> group1Grades, List<Double> group2Grades) {
+        int totalStudents = grades.size();
+        int group1Size = group1Grades.size();
+        int group2Size = group2Grades.size();
+
+        double varianceWithProperty = calculateGroupVariance(group1Grades);
+        double varianceWithoutProperty = calculateGroupVariance(group2Grades);
+
+        double weightedVariance = ((double) group1Size / totalStudents) * varianceWithProperty +
+                ((double) group2Size / totalStudents) * varianceWithoutProperty;
         return weightedVariance;
     }
 
-    private static double calculateVarianceReduction2(List<Double> grades, List<Double> gradesWith, List<Double> gradesWithout) {
-        if (grades.isEmpty()) return 0;
-        double varianceReduction = calculateOverallVariance(grades) - calculateWeightedVariance(grades, gradesWith, gradesWithout);
-        return varianceReduction;
-    }
-
-    //It returns list with students that pass the course with property/without property.
-    private static List<Double> getStudentsPass(List<Double> grades) {
-        List<Double> studentsPass = new ArrayList<>();
-        for (Double grade : grades) {
-            if (grade != null && grade >= 6) {
-                studentsPass.add(grade);
-            }
-        }
-        return studentsPass;
+    private double calculateVarianceReduction(List<Double> grades, List<Double> group1Grades, List<Double> group2Grades) {
+        double overallVariance = calculateOverallVariance(grades);
+        double weightedVariance = calculateWeightedVariance(grades, group1Grades, group2Grades);
+        return overallVariance - weightedVariance;
     }
 
     private static List<Course> getNotStartedCourses(List<Course> courses) {
@@ -282,6 +278,19 @@ public class PredictionManager2 {
         }
 
         for (Course similarCourse : similarCoursesList) {
+            // Collect all grades for the current similarCourse to use as `grades`
+            List<Double> grades = new ArrayList<>();
+            for (CurrentStudentRecord student : studentRecords.values()) {
+                List<Double> studentGrades = student.getCourseGrades();
+                int courseIndex = similarCourse.getColumnIndex();
+                if (courseIndex >= 0 && courseIndex < studentGrades.size()) {
+                    Double grade = studentGrades.get(courseIndex);
+                    if (grade != null) {
+                        grades.add(grade);
+                    }
+                }
+            }
+
             double bestVarianceReduction = 0;
             String bestProperty = null;
             Object bestBoundaryValue = null;
@@ -292,24 +301,23 @@ public class PredictionManager2 {
                 for (Object boundaryValue : boundaryValues) {
                     List<Double> group1Grades = new ArrayList<>();
                     List<Double> group2Grades = new ArrayList<>();
-                    List<Double> grades = new ArrayList<>();
 
                     for (CurrentStudentRecord student : studentRecords.values()) {
-                        grades = student.getCourseGrades();
+                        List<Double> studentGrades = student.getCourseGrades();
                         int courseIndex = similarCourse.getColumnIndex();
-
-                        if (courseIndex >= 0 && courseIndex < grades.size()) {
-                            Double grade = grades.get(courseIndex);
+                        if (courseIndex >= 0 && courseIndex < studentGrades.size()) {
+                            Double grade = studentGrades.get(courseIndex);
                             if (grade == null) continue;
 
                             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
                             if (infoRecord != null) {
                                 Object propertyValue = getStudentProperty(infoRecord, property);
+
                                 if (isNumericProperty(property)) {
                                     if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
-                                        group1Grades.add(grade);
+                                        group1Grades.add(grade); // Group with the property
                                     } else {
-                                        group2Grades.add(grade);
+                                        group2Grades.add(grade); // Group without the property
                                     }
                                 } else {
                                     if (propertyValue.equals(boundaryValue)) {
@@ -322,11 +330,14 @@ public class PredictionManager2 {
                         }
                     }
 
-                    double varianceReduction = calculateVarianceReduction2(grades, group1Grades, group2Grades);
-                    if (varianceReduction > bestVarianceReduction) {
-                        bestVarianceReduction = varianceReduction;
-                        bestProperty = property;
-                        bestBoundaryValue = boundaryValue;
+                    // Only calculate variance reduction if both groups have data
+                    if (!group1Grades.isEmpty() && !group2Grades.isEmpty()) {
+                        double varianceReduction = calculateVarianceReduction(grades, group1Grades, group2Grades);
+                        if (varianceReduction > bestVarianceReduction) {
+                            bestVarianceReduction = varianceReduction;
+                            bestProperty = property;
+                            bestBoundaryValue = boundaryValue;
+                        }
                     }
                 }
             }
