@@ -242,6 +242,9 @@ public class PredictionManager2 {
 
         //It should get notStartedCourses and similarCourses to not started ones.
         //Size of list with notStartedCourses is always 0 so I think that is why this does not work.
+        CourseManager courseManager = CourseManager.getInstance();
+        courseManager.loadGraduateGrades();
+        List<Course> graduatedCourses = courseManager.getGraduatedCourses();
 
         List<Course> notStartedCourses = getNotStartedCourses(courses);
         if (notStartedCourses.isEmpty()) {
@@ -253,8 +256,15 @@ public class PredictionManager2 {
 
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
-
-        for (Course notStartedCourse : notStartedCourses) {
+        List <Course> notStartedCoursesInGraduatedStudents = new ArrayList<>();
+        for (Course targetCourse : graduatedCourses ){
+            for (Course notStartedCourse : notStartedCourses){
+                if (targetCourse.getName().equals(notStartedCourse.getName())){
+                notStartedCoursesInGraduatedStudents.add(targetCourse);
+                }
+            }
+        }
+        for (Course notStartedCourse : notStartedCoursesInGraduatedStudents) {
             Course mostSimilarCourse = similarCourses.findMostSimilarCourse(notStartedCourse);
             if (mostSimilarCourse != null) {
                 similarCoursesList.add(mostSimilarCourse);
