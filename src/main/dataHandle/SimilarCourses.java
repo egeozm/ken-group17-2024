@@ -20,7 +20,7 @@ public class SimilarCourses {
         for (Course course : graduatedCourses) {
             if (!course.getName().equals(targetCourse.getName())) {
                 double similarity = pearsonCorrelation(targetCourse.getGrades(), course.getGrades());
-                System.out.printf("Comparing %s with %s: Similarity = %.4f\n", targetCourse.getName(), course.getName(), similarity);
+//                System.out.printf("Comparing %s with %s: Similarity = %.4f\n", targetCourse.getName(), course.getName(), similarity);
 
 
                 if (similarity > highestSimilarity) {

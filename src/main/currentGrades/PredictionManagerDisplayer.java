@@ -25,6 +25,6 @@ public class PredictionManagerDisplayer {
         PredictionManager2 predictionManager2 = new PredictionManager2(currentStudentManager, currentCourses, studentInfoManager, similarCourses);
 
         // Run the prediction using current data
-        predictionManager2.findBestPropertyForUncomplitedCourses(currentCourses);
+        predictionManager2.findBestPropertyForUncompletedCourses(currentCourses);
     }
 }
