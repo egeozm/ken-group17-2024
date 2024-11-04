@@ -262,11 +262,9 @@ public class PredictionManager2 {
 
         List<Course> similarCoursesList = new ArrayList<>();
         Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
-
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
 
-        // Find unstarted courses in graduated data
         List<Course> notStartedCoursesInGraduatedStudents = new ArrayList<>();
         for (Course targetCourse : graduatedCourses) {
             for (Course notStartedCourse : notStartedCourses) {
@@ -276,7 +274,6 @@ public class PredictionManager2 {
             }
         }
 
-        // Find similar courses for each unstarted course in graduated data
         for (Course notStartedCourse : notStartedCoursesInGraduatedStudents) {
             Course mostSimilarCourse = similarCourses.findMostSimilarCourse(notStartedCourse);
             if (mostSimilarCourse != null) {
@@ -284,68 +281,62 @@ public class PredictionManager2 {
             }
         }
 
-        double lowestVarianceReduction = Double.MAX_VALUE;
-        String bestProperty = "";
-        Course bestCourse = null;
-        Object bestBoundaryValue = null;
-
-        // Loop through similar courses and properties to find the best variance reduction
         for (Course similarCourse : similarCoursesList) {
+            double bestVarianceReduction = 0;
+            String bestProperty = null;
+            Object bestBoundaryValue = null;
+
             for (String property : properties) {
                 List<Object> boundaryValues = getBoundaryValuesForProperty(property);
+
                 for (Object boundaryValue : boundaryValues) {
                     List<Double> group1Grades = new ArrayList<>();
                     List<Double> group2Grades = new ArrayList<>();
                     List<Double> grades = new ArrayList<>();
 
-                    // Populate groups based on the boundary value comparison
                     for (CurrentStudentRecord student : studentRecords.values()) {
                         grades = student.getCourseGrades();
                         int courseIndex = similarCourse.getColumnIndex();
+
                         if (courseIndex >= 0 && courseIndex < grades.size()) {
                             Double grade = grades.get(courseIndex);
-                            if (grade == null) continue; // Skip students with null grades
+                            if (grade == null) continue;
 
-                            // Get student information
                             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
                             if (infoRecord != null) {
                                 Object propertyValue = getStudentProperty(infoRecord, property);
-
                                 if (isNumericProperty(property)) {
                                     if (comparePropertyToBoundary(propertyValue, boundaryValue)) {
-                                        group1Grades.add(grade); // Above boundary
+                                        group1Grades.add(grade);
                                     } else {
-                                        group2Grades.add(grade); // Below boundary
+                                        group2Grades.add(grade);
                                     }
                                 } else {
                                     if (propertyValue.equals(boundaryValue)) {
-                                        group1Grades.add(grade); // Matches boundary
+                                        group1Grades.add(grade);
                                     } else {
-                                        group2Grades.add(grade); // Does not match
+                                        group2Grades.add(grade);
                                     }
                                 }
                             }
                         }
                     }
 
-                    // Calculate variance reduction for the current boundary value
                     double varianceReduction = calculateVarianceReduction2(grades, group1Grades, group2Grades);
-                    if (varianceReduction < lowestVarianceReduction) {
-                        lowestVarianceReduction = varianceReduction;
+                    if (varianceReduction > bestVarianceReduction) {
+                        bestVarianceReduction = varianceReduction;
                         bestProperty = property;
-                        bestCourse = similarCourse;
                         bestBoundaryValue = boundaryValue;
                     }
                 }
             }
-        }
 
-        // Output the best results
-        if (bestCourse != null) {
-            System.out.printf("Best Variance Reduction: %.4f for Property: %s, Boundary: %s in Course: %s\n",
-                    lowestVarianceReduction, bestProperty, bestBoundaryValue, bestCourse.getName());
-        } else {
-            System.out.println("No optimal variance reduction found.");
+            if (bestProperty != null) {
+                System.out.printf("Best variance reduction for course '%s' is %.4f with property '%s' and boundary value '%s'\n",
+                        similarCourse.getName(), bestVarianceReduction, bestProperty, bestBoundaryValue);
+            } else {
+                System.out.printf("No significant variance reduction found for course '%s'.\n", similarCourse.getName());
+            }
         }
     }
 
