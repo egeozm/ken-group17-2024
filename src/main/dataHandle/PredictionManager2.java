@@ -213,26 +213,34 @@ public class PredictionManager2 {
 
     private List<Object> getBoundaryValuesForProperty(String property) {
         List<Object> boundaryValues = new ArrayList<>();
-        List<StudentInfoRecord> studentRecords = studentInfoManager.getAllStudents();  // Now it's a list, not a map
+        List<StudentInfoRecord> studentRecords = studentInfoManager.getAllStudents();
 
         // Collect unique values for the property
         Set<Object> uniqueValues = new HashSet<>();
-        for (StudentInfoRecord student : studentRecords) {  // Iterate over the list of students
+        for (StudentInfoRecord student : studentRecords) {
             Object propertyValue = getStudentProperty(student, property);
             if (propertyValue != null) {
-                uniqueValues.add(propertyValue);  // Add the property value to the unique values set
+                uniqueValues.add(propertyValue);  // Add unique property values
             }
         }
 
+        // Separate handling for numeric properties
         if (isNumericProperty(property)) {
             List<Double> numericValues = new ArrayList<>();
             for (Object value : uniqueValues) {
-                numericValues.add(Double.parseDouble(value.toString()));  // Convert property values to double
+                try {
+                    numericValues.add(Double.parseDouble(value.toString()));  // Convert to Double
+                } catch (NumberFormatException e) {
+                    System.out.println("Warning: Non-numeric value found for numeric property " + property + ": " + value);
+                }
             }
-
             if (!numericValues.isEmpty()) {
-                boundaryValues.addAll(uniqueValues);
+                numericValues.sort(Double::compareTo);  // Optional: Sort numeric values if needed
+                boundaryValues.addAll(numericValues);
             }
+        } else {
+            // For non-numeric properties, add unique values directly
+            boundaryValues.addAll(uniqueValues);
         }
 
         return boundaryValues;
@@ -256,6 +264,7 @@ public class PredictionManager2 {
 
         String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
                 "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
+
         List <Course> notStartedCoursesInGraduatedStudents = new ArrayList<>();
         for (Course targetCourse : graduatedCourses ){
             for (Course notStartedCourse : notStartedCourses){
