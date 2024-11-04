@@ -184,8 +184,8 @@ public class PredictionManager2 {
     //It returns list with students that pass the course with property/without property.
     private static List<Double> getStudentsPass(List<Double> grades) {
         List<Double> studentsPass = new ArrayList<>();
-        for (double grade : grades) {
-            if (grade >= 6) {
+        for (Double grade : grades) {
+            if (grade != null && grade >= 6) {
                 studentsPass.add(grade);
             }
         }
