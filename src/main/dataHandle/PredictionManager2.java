@@ -245,15 +245,17 @@ public class PredictionManager2 {
         return boundaryValues;
     }
 
-    public void findBestPropertyForUncompletedCourses(List<Course> courses) {
+    public List<String> findBestPropertyForUncompletedCourses(List<Course> courses) {
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
         List<Course> graduatedCourses = courseManager.getGraduatedCourses();
 
+        List <String> bestProperties = new ArrayList<>();
+
         List<Course> notStartedCourses = getNotStartedCourses(courses);
         if (notStartedCourses.isEmpty()) {
             System.out.println("No unstarted courses found.");
-            return;
+            return null;
         }
 
         List<Course> similarCoursesList = new ArrayList<>();
@@ -294,6 +296,7 @@ public class PredictionManager2 {
             double bestVarianceReduction = 0;
             String bestProperty = null;
             Object bestBoundaryValue = null;
+
 
             for (String property : properties) {
                 List<Object> boundaryValues = getBoundaryValuesForProperty(property);
@@ -345,10 +348,13 @@ public class PredictionManager2 {
             if (bestProperty != null) {
                 System.out.printf("Best variance reduction for course '%s' is %.4f with property '%s' and boundary value '%s'\n",
                         similarCourse.getName(), bestVarianceReduction, bestProperty, bestBoundaryValue);
+                        bestProperties.add(bestProperty);
             } else {
                 System.out.printf("No significant variance reduction found for course '%s'.\n", similarCourse.getName());
             }
+
         }
+        return bestProperties;
     }
 
 
