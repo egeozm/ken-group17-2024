@@ -296,21 +296,32 @@ public class PredictionManager2 {
             double bestVarianceReduction = 0;
             String bestProperty = null;
             Object bestBoundaryValue = null;
+            int bestPassCount = 0;
+            int bestFailCount = 0;
 
 
             for (String property : properties) {
                 List<Object> boundaryValues = getBoundaryValuesForProperty(property);
+                //System.out.println(property);
 
                 for (Object boundaryValue : boundaryValues) {
                     List<Double> group1Grades = new ArrayList<>();
                     List<Double> group2Grades = new ArrayList<>();
+                    int passCount = 0;
+                    int failCount = 0;
 
                     for (CurrentStudentRecord student : studentRecords.values()) {
                         List<Double> studentGrades = student.getCourseGrades();
                         int courseIndex = similarCourse.getColumnIndex();
                         if (courseIndex >= 0 && courseIndex < studentGrades.size()) {
                             Double grade = studentGrades.get(courseIndex);
-                            if (grade == null) continue;
+                            if (grade == null){
+                                continue;
+                            }else if (grade >= 6.0){
+                                passCount++;
+                            }else{
+                                failCount++;
+                            }
 
                             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
                             if (infoRecord != null) {
@@ -334,12 +345,16 @@ public class PredictionManager2 {
                     }
 
                     // Only calculate variance reduction if both groups have data
-                    if (!group1Grades.isEmpty() && !group2Grades.isEmpty()) {
+                    //System.out.println(property);
+                    if (!group1Grades.isEmpty() && !group2Grades.isEmpty() ) {
                         double varianceReduction = calculateVarianceReduction(grades, group1Grades, group2Grades);
                         if (varianceReduction > bestVarianceReduction) {
                             bestVarianceReduction = varianceReduction;
                             bestProperty = property;
                             bestBoundaryValue = boundaryValue;
+                            bestPassCount = passCount;
+                            bestFailCount = failCount;
+                            //System.out.println(property);
                         }
                     }
                 }
@@ -349,6 +364,11 @@ public class PredictionManager2 {
                 System.out.printf("Best variance reduction for course '%s' is %.4f with property '%s' and boundary value '%s'\n",
                         similarCourse.getName(), bestVarianceReduction, bestProperty, bestBoundaryValue);
                         bestProperties.add(bestProperty);
+                if (bestPassCount > bestFailCount){
+                    System.out.println("Most likely to pass");
+                }else{
+                    System.out.println("Most likely to fail");
+                }
             } else {
                 System.out.printf("No significant variance reduction found for course '%s'.\n", similarCourse.getName());
             }
