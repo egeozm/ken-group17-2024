@@ -244,24 +244,12 @@ public class PredictionManager2 {
 
         return boundaryValues;
     }
-
-    public List<String> findBestPropertyForUncompletedCourses(List<Course> courses) {
+    public List<Course> findSimilarCoursesToNotStartedCourses (List<Course> notStartedCourses){
         CourseManager courseManager = CourseManager.getInstance();
         courseManager.loadGraduateGrades();
         List<Course> graduatedCourses = courseManager.getGraduatedCourses();
 
-        List <String> bestProperties = new ArrayList<>();
-
-        List<Course> notStartedCourses = getNotStartedCourses(courses);
-        if (notStartedCourses.isEmpty()) {
-            System.out.println("No unstarted courses found.");
-            return null;
-        }
-
         List<Course> similarCoursesList = new ArrayList<>();
-        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
-        String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
-                "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
 
         List<Course> notStartedCoursesInGraduatedStudents = new ArrayList<>();
         for (Course targetCourse : graduatedCourses) {
@@ -278,6 +266,36 @@ public class PredictionManager2 {
                 similarCoursesList.add(mostSimilarCourse);
             }
         }
+        return similarCoursesList;
+    }
+
+
+    private String[] getProperties(){
+        String[] properties = {"Neuro-Synaptic Interface Level", "Chrono-Adaptation Rate", "Plasma Conductivity Quotient",
+                "Telepathic Synchronisation Index", "Aetheric Resonance Capacity"};
+        return properties;
+    }
+
+
+
+
+
+
+    public List<String> findBestPropertyForUncompletedCourses(List<Course> courses) {
+
+        List <String> bestProperties = new ArrayList<>();
+
+        List<Course> notStartedCourses = getNotStartedCourses(courses);
+        if (notStartedCourses.isEmpty()) {
+            System.out.println("No unstarted courses found.");
+            return null;
+        }
+
+        Map<Integer, CurrentStudentRecord> studentRecords = studentManager.getAllStudentRecords();
+        String[] properties = getProperties();
+
+        List<Course> similarCoursesList = new ArrayList<>(findSimilarCoursesToNotStartedCourses(notStartedCourses));
+
 
         for (Course similarCourse : similarCoursesList) {
             // Collect all grades for the current similarCourse to use as `grades`
@@ -372,12 +390,53 @@ public class PredictionManager2 {
             } else {
                 System.out.printf("No significant variance reduction found for course '%s'.\n", similarCourse.getName());
             }
-
+            for (Course course : notStartedCourses){
+                    evaluateStudentsForCourse(course, bestProperty, studentRecords, bestBoundaryValue);
+                
+            }
+            
         }
         return bestProperties;
     }
 
 
+    private void evaluateStudentsForCourse(Course course, String bestProperty, Map<Integer, CurrentStudentRecord> studentRecords, Object bestBoundaryValue) {
+        System.out.printf("Evaluating students for course '%s' based on property '%s':\n", course.getName(), bestProperty);
+        int likelyToFailCount = 0;
+        int likelyToPassCount = 0;
+        for (CurrentStudentRecord student : studentRecords.values()) {
+            StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
+            if (infoRecord != null) {
+                Object propertyValue = getStudentProperty(infoRecord, bestProperty);
+                boolean likelyToPass = false;
+    
+
+                    if (isNumericProperty(bestProperty)) {
+                        if (comparePropertyToBoundary(propertyValue, bestBoundaryValue)) {
+                            likelyToPass = true;
+                            likelyToPassCount++;
+
+                        }else {
+                            likelyToFailCount ++;
+                        }
+                    } else {
+                        if (propertyValue.equals(bestBoundaryValue)) {
+                            likelyToPass = true;
+                            likelyToPassCount++;
+
+                        }else{
+                            likelyToFailCount++;
+                        }
+                    }
+    
+                String result = likelyToPass ? "likely to pass" : "likely to fail";
+                System.out.printf("Student ID: %d is %s for course '%s'.\n", student.getStudentID(), result, course.getName());
+            }
+        }
+    
+        System.out.println("Fail: " + likelyToFailCount);
+        System.out.println("Pass: " + likelyToPassCount);
+    }
 }
      
 
