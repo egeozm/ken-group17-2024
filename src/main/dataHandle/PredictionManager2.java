@@ -400,34 +400,37 @@ public class PredictionManager2 {
     }
 
 
-    private void evaluateStudentsForCourse(Course course, String bestProperty, Map<Integer, CurrentStudentRecord> studentRecords, Object bestBoundaryValue) {
+    private Map<Integer, Boolean> evaluateStudentsForCourse(Course course, String bestProperty, Map<Integer, CurrentStudentRecord> studentRecords, Object bestBoundaryValue) {
         System.out.printf("Evaluating students for course '%s' based on property '%s':\n", course.getName(), bestProperty);
+    
         int likelyToFailCount = 0;
         int likelyToPassCount = 0;
+    
+        Map<Integer, Boolean> evaluationResults = new HashMap<>();
+    
         for (CurrentStudentRecord student : studentRecords.values()) {
             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
             if (infoRecord != null) {
                 Object propertyValue = getStudentProperty(infoRecord, bestProperty);
                 boolean likelyToPass = false;
     
-
-                    if (isNumericProperty(bestProperty)) {
-                        if (comparePropertyToBoundary(propertyValue, bestBoundaryValue)) {
-                            likelyToPass = true;
-                            likelyToPassCount++;
-
-                        }else {
-                            likelyToFailCount ++;
-                        }
+                if (isNumericProperty(bestProperty)) {
+                    if (comparePropertyToBoundary(propertyValue, bestBoundaryValue)) {
+                        likelyToPass = true;
+                        likelyToPassCount++;
                     } else {
-                        if (propertyValue.equals(bestBoundaryValue)) {
-                            likelyToPass = true;
-                            likelyToPassCount++;
-
-                        }else{
-                            likelyToFailCount++;
-                        }
+                        likelyToFailCount++;
                     }
+                } else {
+                    if (propertyValue.equals(bestBoundaryValue)) {
+                        likelyToPass = true;
+                        likelyToPassCount++;
+                    } else {
+                        likelyToFailCount++;
+                    }
+                }
+    
+                evaluationResults.put(student.getStudentID(), likelyToPass);
     
                 String result = likelyToPass ? "likely to pass" : "likely to fail";
                 System.out.printf("Student ID: %d is %s for course '%s'.\n", student.getStudentID(), result, course.getName());
@@ -436,6 +439,8 @@ public class PredictionManager2 {
     
         System.out.println("Fail: " + likelyToFailCount);
         System.out.println("Pass: " + likelyToPassCount);
+    
+        return evaluationResults;
     }
 }
      
