@@ -180,9 +180,8 @@ public class PredictionManager2 {
         double varianceWithProperty = calculateGroupVariance(group1Grades);
         double varianceWithoutProperty = calculateGroupVariance(group2Grades);
 
-        double weightedVariance = ((double) group1Size / totalStudents) * varianceWithProperty +
+        return ((double) group1Size / totalStudents) * varianceWithProperty +
                 ((double) group2Size / totalStudents) * varianceWithoutProperty;
-        return weightedVariance;
     }
 
     private double calculateVarianceReduction(List<Double> grades, List<Double> group1Grades, List<Double> group2Grades) {
@@ -295,10 +294,11 @@ public class PredictionManager2 {
         String[] properties = getProperties();
 
         List<Course> similarCoursesList = new ArrayList<>(findSimilarCoursesToNotStartedCourses(notStartedCourses));
-
-
+        String bestProperty = null;
+        Object bestBoundaryValue = null;
         for (Course similarCourse : similarCoursesList) {
             // Collect all grades for the current similarCourse to use as `grades`
+
             List<Double> grades = new ArrayList<>();
             for (CurrentStudentRecord student : studentRecords.values()) {
                 List<Double> studentGrades = student.getCourseGrades();
@@ -312,10 +312,6 @@ public class PredictionManager2 {
             }
 
             double bestVarianceReduction = 0;
-            String bestProperty = null;
-            Object bestBoundaryValue = null;
-            int bestPassCount = 0;
-            int bestFailCount = 0;
 
 
             for (String property : properties) {
@@ -325,8 +321,6 @@ public class PredictionManager2 {
                 for (Object boundaryValue : boundaryValues) {
                     List<Double> group1Grades = new ArrayList<>();
                     List<Double> group2Grades = new ArrayList<>();
-                    int passCount = 0;
-                    int failCount = 0;
 
                     for (CurrentStudentRecord student : studentRecords.values()) {
                         List<Double> studentGrades = student.getCourseGrades();
@@ -335,10 +329,6 @@ public class PredictionManager2 {
                             Double grade = studentGrades.get(courseIndex);
                             if (grade == null){
                                 continue;
-                            }else if (grade >= 6.0){
-                                passCount++;
-                            }else{
-                                failCount++;
                             }
 
                             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
@@ -370,8 +360,6 @@ public class PredictionManager2 {
                             bestVarianceReduction = varianceReduction;
                             bestProperty = property;
                             bestBoundaryValue = boundaryValue;
-                            bestPassCount = passCount;
-                            bestFailCount = failCount;
                             //System.out.println(property);
                         }
                     }
@@ -381,20 +369,22 @@ public class PredictionManager2 {
             if (bestProperty != null) {
                 System.out.printf("Best variance reduction for course '%s' is %.4f with property '%s' and boundary value '%s'\n",
                         similarCourse.getName(), bestVarianceReduction, bestProperty, bestBoundaryValue);
-                        bestProperties.add(bestProperty);
-                if (bestPassCount > bestFailCount){
-                    System.out.println("Most likely to pass");
-                }else{
-                    System.out.println("Most likely to fail");
-                }
+                bestProperties.add(bestProperty);
             } else {
                 System.out.printf("No significant variance reduction found for course '%s'.\n", similarCourse.getName());
             }
-            for (Course course : notStartedCourses){
-                    evaluateStudentsForCourse(course, bestProperty, studentRecords, bestBoundaryValue);
-                
+
+
+
+
+
+
+        }
+        for (Course course : notStartedCourses) {
+            for (Map.Entry<Integer, Boolean> entry : evaluateStudentsForCourse(course, bestProperty, studentRecords, bestBoundaryValue).entrySet()) {
+                String result = entry.getValue() ? "likely to pass" : "likely to fail";
+                System.out.printf("Student ID: %d is %s for course %s.\n", entry.getKey(), result, course.getName());
             }
-            
         }
         return bestProperties;
     }
@@ -402,18 +392,18 @@ public class PredictionManager2 {
 
     private Map<Integer, Boolean> evaluateStudentsForCourse(Course course, String bestProperty, Map<Integer, CurrentStudentRecord> studentRecords, Object bestBoundaryValue) {
         System.out.printf("Evaluating students for course '%s' based on property '%s':\n", course.getName(), bestProperty);
-    
+
         int likelyToFailCount = 0;
         int likelyToPassCount = 0;
-    
+
         Map<Integer, Boolean> evaluationResults = new HashMap<>();
-    
+
         for (CurrentStudentRecord student : studentRecords.values()) {
             StudentInfoRecord infoRecord = studentInfoManager.getStudentByID(student.getStudentID());
             if (infoRecord != null) {
                 Object propertyValue = getStudentProperty(infoRecord, bestProperty);
                 boolean likelyToPass = false;
-    
+
                 if (isNumericProperty(bestProperty)) {
                     if (comparePropertyToBoundary(propertyValue, bestBoundaryValue)) {
                         likelyToPass = true;
@@ -429,17 +419,15 @@ public class PredictionManager2 {
                         likelyToFailCount++;
                     }
                 }
-    
+
                 evaluationResults.put(student.getStudentID(), likelyToPass);
-    
-                String result = likelyToPass ? "likely to pass" : "likely to fail";
-                System.out.printf("Student ID: %d is %s for course '%s'.\n", student.getStudentID(), result, course.getName());
+
             }
         }
-    
+
         System.out.println("Fail: " + likelyToFailCount);
         System.out.println("Pass: " + likelyToPassCount);
-    
+
         return evaluationResults;
     }
 }
