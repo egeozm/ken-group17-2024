@@ -1,0 +1,84 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "SimpleTest",
+            "request": "launch",
+            "mainClass": "src.main.GUI.SimpleTest",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "src.main.GUI.Test",
+            "projectName": "ken_group17_2024_6be98de7",
+            "modulePaths": [
+                "${workspaceFolder}/lib/"
+            ],
+            "classPaths": [
+                "$Auto"
+            ],
+            "vmArgs": "--add-modules javafx.controls,javafx.base -Dprism.order=sw"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "CourseCompletionEstimator",
+            "request": "launch",
+            "mainClass": "src.main.currentGrades.CourseCompletionEstimator",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "CoursePerformanceComparatorDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.currentGrades.CoursePerformanceComparatorDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "PredictionManagerDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.currentGrades.PredictionManagerDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "CourseDifficultyIndicatorDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.graduatedGrades.CourseDifficultyIndicatorDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "GradeSpreadDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.graduatedGrades.GradeSpreadDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "GraduatedCumLaudeStudentsDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.graduatedGrades.GraduatedCumLaudeStudentsDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        },
+        {
+            "type": "java",
+            "name": "SimilarCoursesDisplayer",
+            "request": "launch",
+            "mainClass": "src.main.graduatedGrades.SimilarCoursesDisplayer",
+            "projectName": "ken_group17_2024_6be98de7"
+        }
+    ]
+}
