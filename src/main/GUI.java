@@ -1,7 +1,5 @@
 package src.main;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -13,6 +11,7 @@ import javafx.stage.Stage;
 import src.main.dataHandle.Course;
 import src.main.dataHandle.CourseManager;
 
+import java.util.Objects;
 
 
 public class GUI extends Application {
@@ -50,21 +49,18 @@ public class GUI extends Application {
 
 
         // This Hides the second subject dropdown until "Scatter Plot " is selected, so it can be used for comparison
-        graphDropdown.valueProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if ("Scatter Plot".equals(newValue)) {
-                    // Show the course dropdown and add back all the courses
-                    subjectDropdown2.setVisible(true);
-                    subjectLabel2.setVisible(true);
-                    subjectDropdown2.getItems().clear();  // Clear previous state
-                    for (Course x : Courses.getCurrentCourses()){subjectDropdown2.getItems().add(x.getName());}
-                    for (Course x : Courses.getCurrentCourses()){subjectDropdown2.getItems().add(x.getName());}// Example courses
-                } else {
-                    // Hide the course dropdown if "Scatter Plot" is not selected
-                    subjectDropdown2.setVisible(false);
-                    subjectLabel2.setVisible(false);
-                }
+        graphDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if ("Scatter Plot".equals(newValue)) {
+                // Show the course dropdown and add back all the courses
+                subjectDropdown2.setVisible(true);
+                subjectLabel2.setVisible(true);
+                subjectDropdown2.getItems().clear();  // Clear previous state
+                for (Course x : Courses.getCurrentCourses()){subjectDropdown2.getItems().add(x.getName());}
+                for (Course x : Courses.getCurrentCourses()){subjectDropdown2.getItems().add(x.getName());}// Example courses
+            } else {
+                // Hide the course dropdown if "Scatter Plot" is not selected
+                subjectDropdown2.setVisible(false);
+                subjectLabel2.setVisible(false);
             }
         });
 
@@ -73,8 +69,6 @@ public class GUI extends Application {
         submitButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
         submitButton.setOnAction( e-> {
             //Values submitted
-            String selectedSubject1 = subjectDropdown1.getValue();
-            String selectedSubject2 = subjectDropdown2.getValue();
             String selectedGraph = graphDropdown.getValue();
 
             //Sending to different Scenes
@@ -84,9 +78,9 @@ public class GUI extends Application {
                     // Chrck fro valid subjects and if true then send to scatter graph
                     String subject1 = subjectDropdown1.getValue();
                     String subject2 = subjectDropdown2.getValue();
-                    if (subject1 == "*Pick a Course*" || subject2 == "*Pick a Course*") {
+                    if (Objects.equals(subject1, "*Pick a Course*") || Objects.equals(subject2, "*Pick a Course*")) {
 
-                        showAlert("Error", "Please select both subjects.");
+                        showAlert("Please select both subjects.");
                     } else {
                         //primaryStage.setScene(createScatterPlotScene(primaryStage, subject1, subject2)); ---- put as comment so no errors whilst testing
                     }
@@ -96,10 +90,10 @@ public class GUI extends Application {
                 if ("Histograms".equals(graphDropdown.getValue())) {
                     // Check fro valid subjects and if true then send to scatter graph
                     String subject1 = subjectDropdown1.getValue();
-                    if (subject1 != "*Pick a Course*") {
+                    if (!Objects.equals(subject1, "*Pick a Course*")) {
                         //primaryStage.setScene(createHistogramScene(primaryStage, subject1)); ----  put as comment so no errors whilst testing
                     } else {
-                        showAlert("Error", "Please select a subjects.");
+                        showAlert("Please select a subjects.");
                     }
                 }
 
@@ -109,10 +103,10 @@ public class GUI extends Application {
                 if ("Bar Chart".equals(graphDropdown.getValue())) {
                     // Check for valid subjects and if true then send to scatter graph
                     String subject1 = subjectDropdown1.getValue();
-                    if (subject1 != "*Pick a Course*") {
+                    if (!Objects.equals(subject1, "*Pick a Course*")) {
                         //primaryStage.setScene(createBarChartScene(primaryStage, subject1)); ---- // put as comment so no errors whilst testing
                     } else {
-                        showAlert("Error", "Please select a subjects.");
+                        showAlert("Please select a subjects.");
                     }
                 }
 
@@ -160,10 +154,10 @@ public class GUI extends Application {
     }
 
 //Implementation of the Alert used for some illegal arguments
-    private void showAlert(String error, String s) {
+    private void showAlert(String s) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("error");
-        alert.setHeaderText(error);
+        alert.setTitle("Error");
+        alert.setHeaderText("Error");
         alert.setContentText(s);
         alert.show();
 
