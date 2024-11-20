@@ -75,7 +75,7 @@ public class GUI extends Application {
 
             if(selectedGraph.equals("Scatter Plot")){
                 if ("Scatter Plot".equals(graphDropdown.getValue())) {
-                    // Chrck fro valid subjects and if true then send to scatter graph
+                    // Check for valid subjects and if true then send to scatter graph
                     String subject1 = subjectDropdown1.getValue();
                     String subject2 = subjectDropdown2.getValue();
                     if (Objects.equals(subject1, "*Pick a Course*") || Objects.equals(subject2, "*Pick a Course*")) {
@@ -88,7 +88,7 @@ public class GUI extends Application {
             };
             if(selectedGraph.equals("Histograms")){
                 if ("Histograms".equals(graphDropdown.getValue())) {
-                    // Check fro valid subjects and if true then send to scatter graph
+                    // Check for valid subjects and if true then send to scatter graph
                     String subject1 = subjectDropdown1.getValue();
                     if (!Objects.equals(subject1, "*Pick a Course*")) {
                         //primaryStage.setScene(createHistogramScene(primaryStage, subject1)); ----  put as comment so no errors whilst testing
