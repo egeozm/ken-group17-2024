@@ -95,7 +95,7 @@ public class CourseManager {
 
         for (Double grade : grades) {
             if (grade != null) {
-                int index =  grade.intValue();
+                int index = grade.intValue();
                 if (index >= 0 && index <= 10) {
                     frequency[index]++;
                 }
@@ -118,6 +118,17 @@ public class CourseManager {
     // Getters for course records
     public List<Course> getCurrentCourses() {
         return currentCourses;
+    }
+
+    public Course getCourseByName(String name) {
+        for (Course course : graduatedCourses) {
+            if (course.getName().equalsIgnoreCase(name)) {
+                return course;
+            }
+        }
+        return null;
+
+
     }
 
     public List<Course> getGraduatedCourses() {
