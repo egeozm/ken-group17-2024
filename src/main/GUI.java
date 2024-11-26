@@ -167,14 +167,16 @@ public class GUI extends Application {
 
         // Navigation Button
         Button navigateButton = new Button("Go to Dashboard");
+        Button exitButton = new Button("Exit");
         navigateButton.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
         navigateButton.setOnAction(e -> new GUI().start(primaryStage));
+        exitButton.setOnAction(e -> System.exit(0));
 
         // Layout
         VBox layout = new VBox(10);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(20));
-        layout.getChildren().addAll(titleLabel, navigateButton);
+        layout.getChildren().addAll(titleLabel, navigateButton, exitButton);
 
         return new Scene(layout, 400, 300);
     }
