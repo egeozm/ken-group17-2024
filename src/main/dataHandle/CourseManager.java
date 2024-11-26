@@ -68,6 +68,8 @@ public class CourseManager {
         loadCoursesFromCsv("src/csvFiles/CurrentGrades.csv", false);
     }
 
+    public void loadPredictedGrades() { loadCoursesFromCsv("src/csvFiles/PredictedGradesDecisionStump.csv", false); }
+
     // Switch to load Graduate Grades
     public void loadGraduateGrades() {
         loadCoursesFromCsv("src/csvFiles/GraduateGrades.csv", true);
