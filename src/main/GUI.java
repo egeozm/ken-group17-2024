@@ -27,7 +27,7 @@ public class GUI extends Application {
         ComboBox<String> selectDataDropdown = new ComboBox<>();
         selectDataDropdown.setPrefWidth(300);
         CourseManager courses = CourseManager.getInstance();
-        courses.loadCurrentGrades();
+        courses.loadPredictedGrades();
         for (Course course : courses.getCurrentCourses()) {
             selectDataDropdown.getItems().add(course.getName());
         }

@@ -47,7 +47,7 @@ public class GraphManager {
 
         // Access the data
         CourseManager courses = CourseManager.getInstance();
-        courses.loadGraduateGrades();
+        courses.loadPredictedGrades();
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
@@ -113,7 +113,7 @@ public class GraphManager {
 
         // Accession the data
         CourseManager courses = CourseManager.getInstance();
-        courses.loadGraduateGrades();
+        courses.loadPredictedGrades();
         Course course1 = courses.getCourseByName(subject1);
         Course course2 = courses.getCourseByName(subject2);
 

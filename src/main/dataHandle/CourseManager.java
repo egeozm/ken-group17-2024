@@ -123,7 +123,7 @@ public class CourseManager {
     }
 
     public Course getCourseByName(String name) {
-        for (Course course : graduatedCourses) {
+        for (Course course : currentCourses) {
             if (course.getName().equalsIgnoreCase(name)) {
                 return course;
             }
