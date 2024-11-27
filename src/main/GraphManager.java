@@ -1,11 +1,16 @@
 package src.main;
 
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -20,9 +25,67 @@ import src.main.dataHandle.CourseManager;
 import java.util.List;
 
 public class GraphManager {
+    public static Scene createBarChartScene(Stage primaryStage, String subject, String selectedAxis) {
+        // Title and Back Button
+        Label titleLabel = new Label("Bar Chart: " + subject + " Grade Distribution");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
+        backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage))); // Return to the main scene
+
+        // X-Axis and Y-Axis
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Grades");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Number of Students");
+
+        // Creating the Bar Chart
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Grade Distribution for " + subject);
+
+        // Access the data
+        CourseManager courses = CourseManager.getInstance();
+        courses.loadGraduateGrades();
+        Course course = courses.getCourseByName(subject);
+
+        if (course != null) {
+            List<Double> grades = course.getGrades();
+
+            // Count occurrences of each grade
+            Map<Double, Integer> gradeCounts = new TreeMap<>();
+            for (Double grade : grades) {
+                if (grade != null){
+                    gradeCounts.put(grade, gradeCounts.getOrDefault(grade, 0) + 1);
+                }
+
+            }
+
+            // Add data to series
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName(subject + " " +selectedAxis);
+
+            for (Map.Entry<Double, Integer> entry : gradeCounts.entrySet()) {
+                series.getData().add(new XYChart.Data<>(String.valueOf(entry.getKey()), entry.getValue()));
+            }
+
+            // Add series to bar chart
+            barChart.getData().add(series);
+        }
+
+        // Layout
+        VBox layout = new VBox(10, titleLabel, barChart, backButton);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        return new Scene(layout, 800, 600);
+    }
+
+
 
     //Implementation of the scatter plot diagram below
-    public static Scene createScatterPlotScene(Stage primaryStage, String subject1, String subject2) {
+    public static Scene createScatterPlotScene(Stage primaryStage, String subject1,String subject2, String selectedAxis) {
         // Title and Back Button
         Label titleLabel = new Label("Scatter Plot: " + subject1 + " vs " + subject2);
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");

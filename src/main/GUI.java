@@ -13,8 +13,11 @@ import src.main.dataHandle.CourseManager;
 
 public class GUI extends Application {
 
+    private ComboBox<String> secondDropdown = null; // Reference for the second dropdown
+
     @Override
     public void start(Stage primaryStage) {
+
         // Title Label
         Label titleLabel = new Label("Data Dashboard");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
@@ -24,11 +27,42 @@ public class GUI extends Application {
         ComboBox<String> selectDataDropdown = new ComboBox<>();
         selectDataDropdown.setPrefWidth(300);
         CourseManager courses = CourseManager.getInstance();
-        courses.loadPredictedGrades();
+        courses.loadCurrentGrades();
         for (Course course : courses.getCurrentCourses()) {
             selectDataDropdown.getItems().add(course.getName());
         }
         selectDataDropdown.setValue("All Courses");
+
+        // Button to add a second dropdown
+        Button addDropdownButton = new Button("Add second course for Scatter Plot");
+        addDropdownButton.setStyle("-fx-font-size: 14px; -fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
+        addDropdownButton.setPrefSize(300, 30);
+
+
+        // VBox to hold the dropdowns
+        VBox dropdownContainer = new VBox(10);
+        dropdownContainer.setAlignment(Pos.CENTER);
+        dropdownContainer.getChildren().add(selectDataDropdown);
+
+        dropdownContainer.getChildren().add(addDropdownButton);
+
+        addDropdownButton.setOnAction(e -> {
+            if (secondDropdown == null) { // Add the second dropdown only if it doesn't exist
+                secondDropdown = new ComboBox<>();
+                secondDropdown.setPrefWidth(300);
+                secondDropdown.getItems().add("All Courses");
+                for (Course course : courses.getCurrentCourses()) {
+                    secondDropdown.getItems().add(course.getName());
+                }
+                secondDropdown.setValue("All Courses");
+
+                Label scatterLabel = new Label("Choose second course: ");
+                scatterLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+                dropdownContainer.getChildren().addAll(scatterLabel, secondDropdown);
+
+                dropdownContainer.getChildren().remove(addDropdownButton);
+            }
+        });
 
         // Dropdown for "Select X-Axis"
         Label selectXAxisLabel = new Label("Select X-Axis:");
@@ -66,15 +100,29 @@ public class GUI extends Application {
         HBox chartButtons = new HBox(15);
         chartButtons.setAlignment(Pos.CENTER);
         chartButtons.setPadding(new Insets(20));
+        //Bar Chart
         Button barChartButton = createChartButton("Bar Chart");
+        barChartButton.setOnAction(e -> {
+            String selectedCourse = selectDataDropdown.getValue();
+            String selectedXAxis = selectXAxisDropdown.getValue();
+            if (selectedCourse != null && selectedXAxis != null) {
+                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, selectedXAxis));
+            } else {
+                showAlert("Please select both a course and an X-Axis.");
+            }
+        });
+
+        //Box Plot
         Button boxPlotButton = createChartButton("Box Plot");
 
+        //Scatter Plot
         Button scatterPlotButton = createChartButton("Scatter Plot");
         scatterPlotButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
-            if (selectedCourse != null && selectedXAxis != null) {
-                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selectedXAxis));
+            String selected2ndCourse = secondDropdown.getValue();
+            if (selectedCourse != null && selectedXAxis != null && secondDropdown != null) {
+                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selected2ndCourse, selectedXAxis));
             } else {
                 showAlert("Please select both a course and an X-Axis.");
             }
@@ -100,18 +148,19 @@ public class GUI extends Application {
 
         layout.getChildren().addAll(
                 titleLabel,
-                selectDataLabel, selectDataDropdown,
+                selectDataLabel, dropdownContainer,
                 selectXAxisLabel, selectXAxisDropdown,
                 titleEntryLabel, titleEntryField,
                 filterLabel, filterGrid,
                 chartLabel, chartButtons
         );
 
+
         // Set Scene and Show
-        Scene scene = new Scene(layout, 1400, 900);
+        Scene scene = new Scene(new ScrollPane(layout), 763, 700); // Wrap layout in ScrollPane
         primaryStage.setScene(scene);
         primaryStage.setTitle("Data Dashboard");
-        primaryStage.setResizable(true);
+        primaryStage.setResizable(true); // Allow resizing if needed
         primaryStage.show();
     }
 
