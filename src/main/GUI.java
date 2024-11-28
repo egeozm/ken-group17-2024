@@ -100,6 +100,7 @@ public class GUI extends Application {
         HBox chartButtons = new HBox(15);
         chartButtons.setAlignment(Pos.CENTER);
         chartButtons.setPadding(new Insets(20));
+
         //Bar Chart
         Button barChartButton = createChartButton("Bar Chart");
         barChartButton.setOnAction(e -> {
@@ -108,7 +109,7 @@ public class GUI extends Application {
             if (selectedCourse != null && selectedXAxis != null) {
                 primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, selectedXAxis));
             } else {
-                showAlert("Please select both a course and an X-Axis.");
+                showAlert();
             }
         });
 
@@ -124,7 +125,7 @@ public class GUI extends Application {
             if (selectedCourse != null && selectedXAxis != null && secondDropdown != null) {
                 primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selected2ndCourse, selectedXAxis));
             } else {
-                showAlert("Please select both a course and an X-Axis.");
+                showAlert();
             }
         });
 
@@ -164,11 +165,11 @@ public class GUI extends Application {
         primaryStage.show();
     }
 
-    private void showAlert(String message) {
+    private void showAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Input Error");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText("Please select both a course and an X-Axis.");
         alert.showAndWait();
     }
 
