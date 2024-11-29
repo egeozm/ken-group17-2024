@@ -24,12 +24,11 @@ import src.main.dataHandle.CourseManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
-import java.util.List;
 
 public class GraphManager {
-    public static Scene createBarChartScene(Stage primaryStage, String subject, String selectedAxis) {
+    public static Scene createBarChartScene(Stage primaryStage, String subject, String title, String selectedAxis) {
         // Title and Back Button
-        Label titleLabel = new Label("Bar Chart: " + subject + " Grade Distribution");
+        Label titleLabel = new Label(title); // Use the passed title
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         Button backButton = new Button("Back");
@@ -38,7 +37,7 @@ public class GraphManager {
 
         // X-Axis and Y-Axis
         CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel("Grades");
+        xAxis.setLabel(selectedAxis); // Set the label to the selected axis
 
         NumberAxis yAxis = new NumberAxis();
         yAxis.setLabel("Number of Students");
@@ -53,20 +52,19 @@ public class GraphManager {
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
-            List<Double> grades = course.getGrades();
+            List<Double> grades = getFilteredGrades(course); // Use the filtered grades
 
             // Count occurrences of each grade
             Map<Double, Integer> gradeCounts = new TreeMap<>();
             for (Double grade : grades) {
-                if (grade != null){
+                if (grade != null) {
                     gradeCounts.put(grade, gradeCounts.getOrDefault(grade, 0) + 1);
                 }
-
             }
 
             // Add data to series
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName(subject + " " +selectedAxis);
+            series.setName(subject + " " + selectedAxis);
 
             for (Map.Entry<Double, Integer> entry : gradeCounts.entrySet()) {
                 series.getData().add(new XYChart.Data<>(String.valueOf(entry.getKey()), entry.getValue()));
@@ -84,21 +82,18 @@ public class GraphManager {
         return new Scene(layout, 800, 600);
     }
 
-
-
-    //Implementation of the scatter plot diagram below
-    public static Scene createScatterPlotScene(Stage primaryStage, String subject1,String subject2, String selectedAxis) {
+    public static Scene createScatterPlotScene(Stage primaryStage, String subject1, String subject2, String title, String selectedAxis) {
         // Title and Back Button
-        Label titleLabel = new Label("Scatter Plot: " + subject1 + " vs " + subject2);
+        Label titleLabel = new Label(title); // Use the passed title
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         Button backButton = new Button("Back");
         backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
         backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage))); // Return to the main scene
 
-        // X-Axisand Y-Axis (Grades for Both subjects)
+        // X-Axis and Y-Axis (Grades for Both subjects)
         NumberAxis xAxis = new NumberAxis();
-        xAxis.setLabel(subject1 + " Grades");
+        xAxis.setLabel(selectedAxis + " Grades"); // Set the label to the selected axis
         xAxis.setTickLabelFont(Font.font("Arial", 12));
         xAxis.setMinorTickVisible(false);
         NumberAxis yAxis = new NumberAxis();
@@ -110,18 +105,18 @@ public class GraphManager {
         ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
         XYChart.Series<Number, Number> series1 = new XYChart.Series<>();
         series1.setName(subject1); // Set legend name for the first series
-        XYChart.Series<Number, Number> series2 = new XYChart.Series<>();
+        XYChart.Series <Number, Number> series2 = new XYChart.Series<>();
         series2.setName(subject2); // Set legend name for the second series
 
-        // Accession the data
+        // Access the data
         CourseManager courses = CourseManager.getInstance();
         courses.loadPredictedGrades();
         Course course1 = courses.getCourseByName(subject1);
         Course course2 = courses.getCourseByName(subject2);
 
         if (course1 != null && course2 != null) {
-            List<Double> grades1 = course1.getGrades();
-            List<Double> grades2 = course2.getGrades();
+            List<Double> grades1 = getFilteredGrades(course1); // Use the filtered grades
+            List<Double> grades2 = getFilteredGrades(course2); // Use the filtered grades
 
             if (!grades1.isEmpty() && !grades2.isEmpty()) {
                 // Use the smaller dataset size to avoid out-of-bounds errors
@@ -154,7 +149,6 @@ public class GraphManager {
                     });
                 }
             }
-
         }
         // Add data to the scatter chart
         scatterChart.getData().addAll(series1, series2);
@@ -165,12 +159,11 @@ public class GraphManager {
         layout.setAlignment(Pos.CENTER);
 
         return new Scene(layout, 800, 600);
-
     }
 
-    public static Scene createPieChartScene(Stage primaryStage, String subject) {
+    public static Scene createPieChartScene(Stage primaryStage, String subject, String title) {
         // Title and Back Button
-        Label titleLabel = new Label("Pie Chart: " + subject + " Grade Distribution");
+        Label titleLabel = new Label(title); // Use the passed title
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         Button backButton = new Button("Back");
@@ -187,13 +180,13 @@ public class GraphManager {
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
-            List<Double> grades = course.getGrades();
+            List<Double> grades = getFilteredGrades(course); // Use the filtered grades
 
             // Count number of occurrences of each grade
             Map<Double, Integer> gradeCounts = new TreeMap<>();
             for (Double grade : grades) {
                 if (grade != null) {
-                    gradeCounts.put(grade, gradeCounts.getOrDefault(grade, 0) + 1);
+                    gradeCounts.put(grade, gradeCounts.getOrDefault(grade,0) + 1);
                 }
             }
 
@@ -211,5 +204,14 @@ public class GraphManager {
         layout.setAlignment(Pos.CENTER);
 
         return new Scene(layout, 800, 600);
+    }
+
+    private static List<Double> getFilteredGrades(Course course) {
+        List<Double> grades = course.getGrades();
+        // Implement filtering logic based on checkboxes and sliders
+        // For example:
+        // - Check which filters are selected
+        // - Modify the grades list based on selected filters
+        return grades; // Return the filtered list
     }
 }

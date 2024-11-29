@@ -23,7 +23,7 @@ public class GUI extends Application {
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
         // Dropdown for "Select Your Data"
-        Label selectDataLabel = new Label("Select Your Data::");
+        Label selectDataLabel = new Label("Select Your Data:");
         ComboBox<String> selectDataDropdown = new ComboBox<>();
         selectDataDropdown.setPrefWidth(300);
         CourseManager courses = CourseManager.getInstance();
@@ -38,12 +38,10 @@ public class GUI extends Application {
         addDropdownButton.setStyle("-fx-font-size: 14px; -fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
         addDropdownButton.setPrefSize(300, 30);
 
-
         // VBox to hold the dropdowns
         VBox dropdownContainer = new VBox(10);
         dropdownContainer.setAlignment(Pos.CENTER);
         dropdownContainer.getChildren().add(selectDataDropdown);
-
         dropdownContainer.getChildren().add(addDropdownButton);
 
         addDropdownButton.setOnAction(e -> {
@@ -101,29 +99,31 @@ public class GUI extends Application {
         chartButtons.setAlignment(Pos.CENTER);
         chartButtons.setPadding(new Insets(20));
 
-        //Bar Chart
+        // Bar Chart
         Button barChartButton = createChartButton("Bar Chart");
         barChartButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
-            if (selectedCourse != null && selectedXAxis != null) {
-                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, selectedXAxis));
+            String title = titleEntryField.getText(); // Get the title from the TextField
+            if (selectedCourse != null && selectedXAxis != null && !title.isEmpty()) {
+                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, title, selectedXAxis));
             } else {
                 showAlert();
             }
         });
 
-        //Box Plot
+        // Box Plot
         Button boxPlotButton = createChartButton("Box Plot");
 
-        //Scatter Plot
+        // Scatter Plot
         Button scatterPlotButton = createChartButton("Scatter Plot");
         scatterPlotButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
             String selected2ndCourse = secondDropdown.getValue();
-            if (selectedCourse != null && selectedXAxis != null && secondDropdown != null) {
-                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selected2ndCourse, selectedXAxis));
+            String title = titleEntryField.getText(); // Get the title from the TextField
+            if (selectedCourse != null && selectedXAxis != null && secondDropdown != null && !title.isEmpty()) {
+                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selected2ndCourse, title, selectedXAxis));
             } else {
                 showAlert();
             }
@@ -132,12 +132,14 @@ public class GUI extends Application {
         Button pieChartButton = createChartButton("Pie Chart");
         pieChartButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
-            if(selectedCourse != null){
-                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse));
-            } else{
+            String title = titleEntryField.getText(); // Get the title from the TextField
+            if (selectedCourse != null && !title.isEmpty()) {
+                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse, title));
+            } else {
                 showAlert();
             }
         });
+
         chartButtons.getChildren().addAll(barChartButton, boxPlotButton, scatterPlotButton, pieChartButton);
 
         // Main Layout
@@ -163,7 +165,6 @@ public class GUI extends Application {
                 filterLabel, filterGrid,
                 chartLabel, chartButtons
         );
-
 
         // Set Scene and Show
         Scene scene = new Scene(new ScrollPane(layout), 785, 835); // do not touch this
