@@ -130,6 +130,14 @@ public class GUI extends Application {
         });
 
         Button pieChartButton = createChartButton("Pie Chart");
+        pieChartButton.setOnAction(e -> {
+            String selectedCourse = selectDataDropdown.getValue();
+            if(selectedCourse != null){
+                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse));
+            } else{
+                showAlert();
+            }
+        });
         chartButtons.getChildren().addAll(barChartButton, boxPlotButton, scatterPlotButton, pieChartButton);
 
         // Main Layout

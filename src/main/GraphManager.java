@@ -21,7 +21,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import src.main.dataHandle.Course;
 import src.main.dataHandle.CourseManager;
-
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.chart.PieChart;
 import java.util.List;
 
 public class GraphManager {
@@ -165,9 +167,48 @@ public class GraphManager {
         return new Scene(layout, 800, 600);
 
     }
+    public static Scene createPieChartScene(Stage primaryStage, String subject) {
+        // Title and Back Button
+        Label titleLabel = new Label("Pie Chart: " + subject + " Grade Distribution");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
+        Button backButton = new Button("Back");
+        backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
+        backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage)));
 
+        // Pie chart creation
+        PieChart pieChart = new PieChart();
+        pieChart.setTitle("Grade Distribution for " + subject);
+
+        // Access the data from CourseManager.java and Course.java
+        CourseManager courses = CourseManager.getInstance();
+        courses.loadPredictedGrades();
+        Course course = courses.getCourseByName(subject);
+
+        if (course != null) {
+            List<Double> grades = course.getGrades();
+
+            // Count number of occurrences of each grade
+            Map<Double, Integer> gradeCounts = new TreeMap<>();
+            for (Double grade : grades) {
+                if (grade != null) {
+                    gradeCounts.put(grade, gradeCounts.getOrDefault(grade, 0) + 1);
+                }
+            }
+
+            // Populate Pie chart data
+            ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+            for (Map.Entry<Double, Integer> entry : gradeCounts.entrySet()) {
+                pieChartData.add(new PieChart.Data(String.valueOf(entry.getKey()), entry.getValue()));
+            }
+            pieChart.setData(pieChartData);
+        }
+
+        // Design
+        VBox layout = new VBox(10, titleLabel, pieChart, backButton);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        return new Scene(layout, 800, 600);
+    }
 }
-
-
-
