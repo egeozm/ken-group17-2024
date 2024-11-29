@@ -167,6 +167,7 @@ public class GraphManager {
         return new Scene(layout, 800, 600);
 
     }
+
     public static Scene createPieChartScene(Stage primaryStage, String subject) {
         // Title and Back Button
         Label titleLabel = new Label("Pie Chart: " + subject + " Grade Distribution");

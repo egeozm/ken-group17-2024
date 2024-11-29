@@ -166,7 +166,7 @@ public class GUI extends Application {
 
 
         // Set Scene and Show
-        Scene scene = new Scene(new ScrollPane(layout), 763, 700); // Wrap layout in ScrollPane
+        Scene scene = new Scene(new ScrollPane(layout), 785, 835); // do not touch this
         primaryStage.setScene(scene);
         primaryStage.setTitle("Data Dashboard");
         primaryStage.setResizable(true); // Allow resizing if needed
