@@ -56,6 +56,8 @@ public class Main {
 
         Predictor predictor = new Predictor();
         predictor.predictNGForestStump();
+        PredictionAnalyzer predictionAnalyzer = new PredictionAnalyzer();
+        predictionAnalyzer.predictNumberOfGraduating();
 
 
         //predicting the passrate for open courses
@@ -73,8 +75,7 @@ public class Main {
         System.out.println(Arrays.deepToString(a));
 
 
-
-
+    predictionAnalyzer.testGPA(14);
 
 
     }

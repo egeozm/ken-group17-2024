@@ -34,11 +34,13 @@ public class PredictionAnalyzer {
     private String [][] predictedGrades;
     private String [][] infoData;
     ArrayList<CurrentStudent> predictedStudents = new ArrayList<>();
-    public PredictionAnalyzer(String [][] predictedGrades, String [][] infoData) {
+    public PredictionAnalyzer() {
         TwoDimensionalArray fileLoader = new TwoDimensionalArray();
         CurrentStudentAnalyzer currentStudentAnalyzer = new CurrentStudentAnalyzer(fileLoader.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv"),fileLoader.readCsvInto2DArray("src/csvFiles/StudentInfo.csv"));
-        this.predictedGrades = predictedGrades;
-        this.infoData = infoData;
+        ArrayList<CurrentStudent> currentStudents = new ArrayList<>();
+        currentStudents = currentStudentAnalyzer.getAllCurrentStudents();
+        this.predictedGrades = fileLoader.readCsvInto2DArray("src/csvFiles/PredictedGradesDecisionStump.csv");
+        this.infoData = fileLoader.readCsvInto2DArray("src/csvFiles/StudentInfo.csv");
 
 
         // Extracting grades from the CurrentStudent.csv file
@@ -55,9 +57,11 @@ public class PredictionAnalyzer {
             for (int k = 1; k < infoData[i].length; k++) {
                 traits.add(infoData[i][k]);
             }
-            CurrentStudent cStudent = new CurrentStudent(Integer.parseInt(predictedGrades[i][0]), grades, traits);
-            cStudent.setYearOfStudy(currentStudentAnalyzer.findYearOfStudy(grades));
-            predictedStudents.add(cStudent);
+            CurrentStudent pStudent = new CurrentStudent(Integer.parseInt(predictedGrades[i][0]), grades, traits);
+            predictedStudents.add(pStudent);
+        }
+        for (int i = 0; i < predictedStudents.size(); i++) {
+            predictedStudents.get(i).setYearOfStudy(currentStudents.get(i).getYearOfStudy());
         }
     }
 
@@ -80,6 +84,32 @@ public class PredictionAnalyzer {
 
     public ArrayList<CurrentStudent> getPredictedStudents() {
         return predictedStudents;
+    }
+
+
+    public void predictNumberOfGraduating(){
+        int counter = 0;
+        for (CurrentStudent student : predictedStudents) {
+            if (student.getYearOfStudy() == 3) {
+                if (student.hasFailedCourse(student.getGrades())){
+                    counter++;
+                }
+            }
+        }
+        System.out.println("Around " + counter + " students are going to graduate this year!");
+    }
+
+
+    public void testGPA(int p){
+        double avg = 0;
+        int count = 0;
+        double sum = 0;
+        for (int i = 1; i < predictedGrades.length; i++) {
+            sum += Double.parseDouble(predictedGrades[i][p]);
+            count++;
+        }
+        avg = sum / count;
+        System.out.println("Average grade is " + avg);
     }
 
 

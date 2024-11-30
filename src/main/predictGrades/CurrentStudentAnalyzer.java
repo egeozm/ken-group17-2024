@@ -44,13 +44,15 @@ public class CurrentStudentAnalyzer {
         for (Course c : thirdYearCourses) {
             indexesOfThirdYearCourses.add(c.getCourseID());
         }
-
+        int c = 0;
         for (Double grade: grades) {
             if (grade != null) {
-                if (indexesOfThirdYearCourses.contains(grades.indexOf(grade))) {
+                if (indexesOfThirdYearCourses.contains(c)) {
+                    c = 0;
                     return 3;
                 }
             }
+            c++;
         }
         for (Double grade: grades) {
             if (grade != null) {

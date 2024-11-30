@@ -484,6 +484,9 @@ public class Predictor {
             for (int j = 1; j < currentStudentData[0].length; j++) {
                 if (currentStudentData[i][j].contentEquals("NG")) {
                     predictedGrades[i][j] = String.valueOf(Math.round(Double.parseDouble(predictedGrades[i][j]) + differanceGPA));
+                    if(Double.parseDouble(String.valueOf(predictedGrades[i][j])) > 10){
+                        predictedGrades[i][j] = "10";
+                    }
                 }
             }
         }
