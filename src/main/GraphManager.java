@@ -36,55 +36,63 @@ import javafx.scene.chart.PieChart;
 public class GraphManager {
     public static Scene createBarChartScene(Stage primaryStage, String subject, String title, String selectedAxis) {
         // Title and Back Button
-        Label titleLabel = new Label(title); // Use the passed title
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-underline: true;");
 
         Button backButton = new Button("Back");
         backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
         backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage))); // Return to the main scene
 
-        // X-Axis and Y-Axis
+        // Define X-Axis and Y-Axis
         CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel(selectedAxis); // Set the label to the selected axis (e.g., "NSIL")
-
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Average Grade");
 
-        // Creating the Bar Chart
+        if (selectedAxis.equalsIgnoreCase("Grades")) {
+            xAxis.setLabel("Grades");
+            yAxis.setLabel("Frequency");
+        } else {
+            xAxis.setLabel(selectedAxis);
+            yAxis.setLabel("Average Grade");
+        }
+
         BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
 
         // Access the data
         CourseManager courses = CourseManager.getInstance();
-        courses.loadPredictedGrades(); // Load predicted grades dataset
+        courses.loadPredictedGrades();
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
-            // Use StudentGroupingManager to calculate averages
-            StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
-            Map<String, Double> averageGradesByGroup = groupingManager.calculateAverageGradesByAttribute(course, selectedAxis);
-
-            // Add data to series
             XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName(subject + " (" + selectedAxis + ")");
+            series.setName(subject + " - " + selectedAxis);
 
-            for (Map.Entry<String, Double> entry : averageGradesByGroup.entrySet()) {
-                String group = entry.getKey(); // Group name (e.g., "Full", "High")
-                Double averageGrade = entry.getValue(); // Average grade for the group
+            if (selectedAxis.equalsIgnoreCase("Grades")) {
+                // Calculate frequency of grades
+                Map<Double, Long> gradeFrequencies = course.getGrades().stream()
+                        .filter(g -> g != null)
+                        .collect(Collectors.groupingBy(Double::doubleValue, Collectors.counting()));
 
-                // Add data point to the series
-                series.getData().add(new XYChart.Data<>(group, averageGrade));
+                for (Map.Entry<Double, Long> entry : gradeFrequencies.entrySet()) {
+                    series.getData().add(new XYChart.Data<>(String.valueOf(entry.getKey()), entry.getValue()));
+                }
+            } else {
+                // Use the existing logic for other attributes
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                Map<String, Double> averages = groupingManager.calculateAverageGradesByAttribute(course, selectedAxis);
+
+                for (Map.Entry<String, Double> entry : averages.entrySet()) {
+                    series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+                }
             }
 
-            // Add series to bar chart
             barChart.getData().add(series);
         }
 
-        // Layout
-        VBox layout = new VBox(10, titleLabel, barChart, backButton);
+        VBox layout = new VBox(10.0, titleLabel, barChart, backButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        return new Scene(layout, 800, 600);
+        return new Scene(layout, 900, 600);
     }
 
     public static Scene createScatterPlotScene(Stage primaryStage, String subject, String title, String selectedAxis) {
@@ -96,103 +104,111 @@ public class GraphManager {
         backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
         backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage))); // Return to the main scene
 
-        // Define X-Axis (Groups) and Y-Axis (Grades)
+        // Define X-Axis and Y-Axis
         CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setLabel(selectedAxis); // E.g., "NSIL"
-
         NumberAxis yAxis = new NumberAxis();
-        yAxis.setLabel("Grades");
 
-        // Scatter Chart
+        if (selectedAxis.equalsIgnoreCase("Grades")) {
+            xAxis.setLabel("Grades");
+            yAxis.setLabel("Frequency");
+        } else {
+            xAxis.setLabel(selectedAxis);
+            yAxis.setLabel("Grades");
+        }
+
         ScatterChart<String, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
         scatterChart.setTitle(subject + " - Scatter Plot");
 
         // Access the data
         CourseManager courses = CourseManager.getInstance();
-        courses.loadPredictedGrades(); // Load predicted grades dataset
+        courses.loadPredictedGrades();
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
-            StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
-            Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
+            if (selectedAxis.equalsIgnoreCase("Grades")) {
+                // Calculate frequency of grades
+                Map<Double, Long> gradeFrequencies = course.getGrades().stream()
+                        .filter(g -> g != null)
+                        .collect(Collectors.groupingBy(Double::doubleValue, Collectors.counting()));
 
-            // Add each group as a series
-            for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
-                String group = entry.getKey(); // Group name (e.g., "Full", "High")
-                List<Double> grades = entry.getValue();
-
-                // Create a series for the group
                 XYChart.Series<String, Number> series = new XYChart.Series<>();
-                series.setName(group); // Use group name for the legend
+                series.setName("Grade Frequency");
 
-                // Add grades as points to the series
-                for (Double grade : grades) {
-                    if (grade != null) {
-                        series.getData().add(new XYChart.Data<>(group, grade));
-                    }
+                for (Map.Entry<Double, Long> entry : gradeFrequencies.entrySet()) {
+                    series.getData().add(new XYChart.Data<>(String.valueOf(entry.getKey()), entry.getValue()));
                 }
 
-                scatterChart.getData().add(series); // Add series to chart
+                scatterChart.getData().add(series);
+            } else {
+                // Use the existing logic for other attributes
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
+
+                for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
+                    XYChart.Series<String, Number> series = new XYChart.Series<>();
+                    series.setName(entry.getKey());
+
+                    for (Double grade : entry.getValue()) {
+                        if (grade != null) {
+                            series.getData().add(new XYChart.Data<>(entry.getKey(), grade));
+                        }
+                    }
+
+                    scatterChart.getData().add(series);
+                }
             }
         }
 
-        // Layout
         VBox layout = new VBox(10.0, titleLabel, scatterChart, backButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        return new Scene(layout, 900, 600); // Adjust width/height if needed
+        return new Scene(layout, 900, 600);
     }
 
     public static Scene createPieChartScene(Stage primaryStage, String subject, String title, String selectedAxis) {
         // Title and Back Button
         Label titleLabel = new Label(title);
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-underline: true;");
 
         Button backButton = new Button("Back");
         backButton.setStyle("-fx-background-color: #e76f51; -fx-text-fill: white; -fx-font-weight: bold;");
         backButton.setOnAction(e -> primaryStage.setScene(new GUI().createMainScene(primaryStage))); // Return to the main scene
 
-        // Creating the PieChart
         PieChart pieChart = new PieChart();
-        pieChart.setTitle(subject + " (" + selectedAxis + ")");
+        pieChart.setTitle(subject + " - Pie Chart");
 
         // Access the data
         CourseManager courses = CourseManager.getInstance();
-        courses.loadPredictedGrades(); // Load predicted grades dataset
+        courses.loadPredictedGrades();
         Course course = courses.getCourseByName(subject);
 
         if (course != null) {
-            // Use StudentGroupingManager to calculate averages
-            StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
-            Map<String, Double> averageGradesByGroup = groupingManager.calculateAverageGradesByAttribute(course, selectedAxis);
+            if (selectedAxis.equalsIgnoreCase("Grades")) {
+                // Calculate frequency of grades
+                Map<Double, Long> gradeFrequencies = course.getGrades().stream()
+                        .filter(g -> g != null)
+                        .collect(Collectors.groupingBy(Double::doubleValue, Collectors.counting()));
 
-            // Calculate the total average grades for percentage calculation
-            double totalAverageGrade = averageGradesByGroup.values().stream().mapToDouble(Double::doubleValue).sum();
+                for (Map.Entry<Double, Long> entry : gradeFrequencies.entrySet()) {
+                    pieChart.getData().add(new PieChart.Data("Grade " + entry.getKey(), entry.getValue()));
+                }
+            } else {
+                // Use existing logic for other attributes
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
 
-            // Add data to the PieChart
-            for (Map.Entry<String, Double> entry : averageGradesByGroup.entrySet()) {
-                String group = entry.getKey(); // Group name (e.g., "Full", "High")
-                Double averageGrade = entry.getValue(); // Average grade for the group
-
-                // Calculate percentage
-                double percentage = (averageGrade / totalAverageGrade) * 100;
-
-                // Create a PieChart.Data object with group name, average grade, and percentage
-                PieChart.Data slice = new PieChart.Data(
-                        group + " (" + String.format("%.2f", averageGrade) + ", " + String.format("%.1f", percentage) + "%)",
-                        averageGrade
-                );
-                pieChart.getData().add(slice);
+                for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
+                    pieChart.getData().add(new PieChart.Data(entry.getKey(), entry.getValue().size()));
+                }
             }
         }
 
-        // Layout
-        VBox layout = new VBox(10, titleLabel, pieChart, backButton);
+        VBox layout = new VBox(10.0, titleLabel, pieChart, backButton);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        return new Scene(layout, 800, 600);
+        return new Scene(layout, 900, 600);
     }
 
     public static Scene createBoxPlotScene(Stage primaryStage, String subject, String title, String selectedAxis) {
@@ -213,8 +229,18 @@ public class GraphManager {
         plotPane.setPrefSize(1000, 600); // Adjust the pane size
 
         if (course != null) {
-            StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
-            Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
+            Map<String, List<Double>> groupedGrades;
+
+            if (selectedAxis.equalsIgnoreCase("Grades")) {
+                // Group by unique grade values
+                groupedGrades = course.getGrades().stream()
+                        .filter(Objects::nonNull) // Exclude null grades
+                        .collect(Collectors.groupingBy(g -> String.valueOf(g), Collectors.toList()));
+            } else {
+                // Use the default grouping by attributes
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
+            }
 
             int groupIndex = 0; // Index to position groups on the X-axis
             double plotWidth = 900; // Total width of the plot
@@ -222,12 +248,12 @@ public class GraphManager {
             double plotHeight = 500; // Height of the plot
 
             for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
-                String group = entry.getKey();
+                String group = entry.getKey(); // Either grade or group name
                 List<Double> grades = entry.getValue();
 
                 // Calculate box plot statistics
-                double min = grades.stream().filter(g -> g != null).mapToDouble(Double::doubleValue).min().orElse(0.0);
-                double max = grades.stream().filter(g -> g != null).mapToDouble(Double::doubleValue).max().orElse(0.0);
+                double min = grades.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+                double max = grades.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
                 double median = calculateMedian(grades);
                 double lowerQuartile = calculateQuartile(grades, 25);
                 double upperQuartile = calculateQuartile(grades, 75);
