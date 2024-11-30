@@ -26,11 +26,7 @@ import java.util.stream.Collectors;
 import javafx.scene.chart.BarChart;
 
 import javafx.scene.control.Label;
-import src.main.dataHandle.Course;
-import src.main.dataHandle.CourseManager;
-import src.main.dataHandle.StudentGroupingManager;
-import src.main.dataHandle.StudentInfoManager;
-import src.main.dataHandle.CurrentStudentManager;
+import src.main.dataHandle.*;
 import javafx.scene.chart.PieChart;
 
 public class GraphManager {
@@ -77,7 +73,7 @@ public class GraphManager {
                 }
             } else {
                 // Use the existing logic for other attributes
-                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new PredictedCurrentStudentManager());
                 Map<String, Double> averages = groupingManager.calculateAverageGradesByAttribute(course, selectedAxis);
 
                 for (Map.Entry<String, Double> entry : averages.entrySet()) {
@@ -141,7 +137,7 @@ public class GraphManager {
                 scatterChart.getData().add(series);
             } else {
                 // Use the existing logic for other attributes
-                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new PredictedCurrentStudentManager());
                 Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
 
                 for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
@@ -185,21 +181,38 @@ public class GraphManager {
 
         if (course != null) {
             if (selectedAxis.equalsIgnoreCase("Grades")) {
-                // Calculate frequency of grades
+                // Calculate grade frequencies
                 Map<Double, Long> gradeFrequencies = course.getGrades().stream()
-                        .filter(g -> g != null)
+                        .filter(Objects::nonNull) // Exclude null grades
                         .collect(Collectors.groupingBy(Double::doubleValue, Collectors.counting()));
 
+                long totalGrades = gradeFrequencies.values().stream().mapToLong(Long::longValue).sum();
+
                 for (Map.Entry<Double, Long> entry : gradeFrequencies.entrySet()) {
-                    pieChart.getData().add(new PieChart.Data("Grade " + entry.getKey(), entry.getValue()));
+                    double grade = entry.getKey();
+                    long count = entry.getValue();
+                    double percentage = (totalGrades > 0) ? (count / (double) totalGrades) * 100 : 0;
+
+                    // Add a pie chart slice with grade and percentage
+                    pieChart.getData().add(new PieChart.Data("Grade " + grade + " (" + String.format("%.1f%%", percentage) + ")", count));
                 }
             } else {
-                // Use existing logic for other attributes
-                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                // Handle other groupings (e.g., NSIL, CAR, etc.)
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new PredictedCurrentStudentManager());
                 Map<String, List<Double>> groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
 
+                // Calculate total count
+                int totalCount = groupedGrades.values().stream()
+                        .mapToInt(List::size)
+                        .sum();
+
                 for (Map.Entry<String, List<Double>> entry : groupedGrades.entrySet()) {
-                    pieChart.getData().add(new PieChart.Data(entry.getKey(), entry.getValue().size()));
+                    String group = entry.getKey();
+                    int groupSize = entry.getValue().size();
+                    double percentage = (totalCount > 0) ? (groupSize / (double) totalCount) * 100 : 0;
+
+                    // Add a pie chart slice with group name and percentage
+                    pieChart.getData().add(new PieChart.Data(group + " (" + String.format("%.1f%%", percentage) + ")", groupSize));
                 }
             }
         }
@@ -238,7 +251,7 @@ public class GraphManager {
                         .collect(Collectors.groupingBy(g -> String.valueOf(g), Collectors.toList()));
             } else {
                 // Use the default grouping by attributes
-                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new CurrentStudentManager());
+                StudentGroupingManager groupingManager = new StudentGroupingManager(new StudentInfoManager(), new PredictedCurrentStudentManager());
                 groupedGrades = groupingManager.groupGradesByAttribute(course, selectedAxis);
             }
 
@@ -348,11 +361,6 @@ public class GraphManager {
         }
         double weight = index - lowerIndex;
         return sorted.get(lowerIndex) * (1 - weight) + sorted.get(upperIndex) * weight;
-    }
-
-    private static double calculatePercentile(List<Double> sortedData, double percentile) {
-        int index = (int) Math.ceil((percentile / 100.0) * sortedData.size()) - 1;
-        return sortedData.get(Math.max(0, Math.min(index, sortedData.size() - 1)));
     }
 
 

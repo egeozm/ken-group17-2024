@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 public class StudentGroupingManager {
 
     private final StudentInfoManager studentInfoManager;
-    private final CurrentStudentManager currentStudentManager;
+    private final PredictedCurrentStudentManager currentStudentManager;
 
-    public StudentGroupingManager(StudentInfoManager studentInfoManager, CurrentStudentManager currentStudentManager) {
+    public StudentGroupingManager(StudentInfoManager studentInfoManager, PredictedCurrentStudentManager currentStudentManager) {
         this.studentInfoManager = studentInfoManager;
         this.currentStudentManager = currentStudentManager;
     }
