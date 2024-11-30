@@ -359,11 +359,22 @@ public class Predictor {
         ArrayList<Double> means = new ArrayList<>();
 
         String[][] predictedGrades = new String[currentStudentData.length][currentStudentData[0].length];
+
+        double overallGPA = 0;
+        int counter = 0;
+        double sum = 0;
+
+
         for (int i = 0; i < currentStudentData.length; i++) {
             for (int j = 0; j < currentStudentData[i].length; j++) {
                 predictedGrades[i][j] = currentStudentData[i][j];
+                if (i > 0 && j > 0 && !predictedGrades[i][j].contentEquals("NG")){
+                    sum += Double.parseDouble(predictedGrades[i][j]);
+                    counter++;
+                }
             }
         }
+        overallGPA = sum / counter;
 //        for (Course c: currentCourses) {
 //            ArrayList<Integer> sortedProperties = new ArrayList<>();
 //            ArrayList<String> p0 = new ArrayList<>(findBestThresholdForString(NSIBoundaries, c.getGrades()));
@@ -449,10 +460,32 @@ public class Predictor {
                 }
             }
         }
-        for (int i = 0; i<predictedGrades.length; i++){
+        for (int i = 1; i<predictedGrades.length; i++){
             predictedGrades[i][9] = predictedGrades [i][22];
             predictedGrades[i][14] = predictedGrades [i][16];
             predictedGrades[i][32] = predictedGrades [i][31];
+        }
+
+        //final stump: adjusting the grade by comparing the student's gpa with overall gpa
+        for (int i = 1; i < currentStudentData.length; i++){
+            double studentGPA = 0;
+            double count = 0;
+            double gradesSum = 0;
+            for (int j = 1; j < currentStudentData[0].length; j++){
+                if (currentStudentData[i][j].contentEquals("NG")){
+                    continue;
+                }else {
+                    gradesSum += Double.parseDouble(predictedGrades[i][j]);
+                    count++;
+                }
+            }
+            studentGPA = gradesSum / count;
+            double differanceGPA = studentGPA - overallGPA;
+            for (int j = 1; j < currentStudentData[0].length; j++) {
+                if (currentStudentData[i][j].contentEquals("NG")) {
+                    predictedGrades[i][j] = String.valueOf(Math.round(Double.parseDouble(predictedGrades[i][j]) + differanceGPA));
+                }
+            }
         }
 
         CSVWriter writer = new CSVWriter();
@@ -518,6 +551,25 @@ public class Predictor {
         }
         result = sigma / count;
         return result;
+    }
+
+    public Double[] predictPassRate (){
+        TwoDimensionalArray twoDimensionalArray = new TwoDimensionalArray();
+        String predictedFileName = "src/csvFiles/PredictedGradesDecisionStump.csv";
+        String [][] predictedData = twoDimensionalArray.readCsvInto2DArray(predictedFileName);
+        Double[] passRates = new Double[predictedData[0].length - 1];
+        for (int i = 1; i < predictedData[0].length; i++) {
+            double passRate = 0;
+            double counter = 0;
+            for (int j = 1; j < predictedData.length; j++) {
+                if (Double.parseDouble(predictedData[j][i]) >= 6.0) {
+                    counter++;
+                }
+            }
+            passRate = Math.round((counter / (predictedData.length - 1) * 100)) - 1;
+            passRates[i - 1] = passRate;
+        }
+        return passRates;
     }
 
 }

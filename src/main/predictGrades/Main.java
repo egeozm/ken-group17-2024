@@ -44,34 +44,38 @@ public class Main {
 
 
        //Predicting the NG Grades
-        findBestPropertyForEachCourse(studentInfo);
+//        findBestPropertyForEachCourse(studentInfo);
+//        Predictor predictor = new Predictor();
+//        predictor.predictNG();
+//        CurrentStudentAnalyzer pStudentAnalyzer = new CurrentStudentAnalyzer(currentStudentData, studentInfo);
+//        ArrayList<CurrentStudent> r = new ArrayList<>();
+//        r = pStudentAnalyzer.getAllCurrentStudents();
+
+
+
+
         Predictor predictor = new Predictor();
-        predictor.predictNG();
-        CurrentStudentAnalyzer pStudentAnalyzer = new CurrentStudentAnalyzer(currentStudentData, studentInfo);
-        ArrayList<CurrentStudent> r = new ArrayList<>();
-        r = pStudentAnalyzer.getAllCurrentStudents();
+        predictor.predictNGForestStump();
 
-
-
-
-
-/*
 
         //predicting the passrate for open courses
-        String predictedFileName = "csvFiles/PredictedGrades.csv";
-        String [][] predictedData = fileLoader.readCsvInto2DArray(predictedFileName);
-        PredictionAnalyzer predictionAnalyzer = new PredictionAnalyzer(predictedData, studentInfo, currentStudentData);
-        ArrayList<CurrentStudent> pStudents = new ArrayList<>();
-        pStudents = predictionAnalyzer.getPredictedStudents();
-        ArrayList<Double> predictedPassRates = new ArrayList<>();
-        predictedPassRates = predictionAnalyzer.predictPassRate();
-        Double[] a = predictedPassRates.toArray(new Double[predictedPassRates.size()]);
+//        String predictedFileName = "src/csvFiles/PredictedGradesDecisionStump.csv";
+//        String [][] predictedData = fileLoader.readCsvInto2DArray(predictedFileName);
+//        PredictionAnalyzer predictionAnalyzer = new PredictionAnalyzer(predictedData, studentInfo, currentStudentData);
+//        ArrayList<CurrentStudent> pStudents = new ArrayList<>();
+//        pStudents = predictionAnalyzer.getPredictedStudents();
+//        ArrayList<Double> predictedPassRates = new ArrayList<>();
+//        predictedPassRates = predictionAnalyzer.predictPassRate();
+//        Double[] a = predictedPassRates.toArray(new Double[predictedPassRates.size()]);
+//        System.out.println(Arrays.deepToString(a));
+
+        Double[] a = predictor.predictPassRate();
         System.out.println(Arrays.deepToString(a));
 
- */
 
-        //Predictor predictor = new Predictor();
-        predictor.predictNGForestStump();
+
+
+
 
     }
     public static void findBestPropertyForEachCourse(String[][] studentInfo){
