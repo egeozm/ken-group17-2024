@@ -13,8 +13,6 @@ import src.main.dataHandle.CourseManager;
 
 public class GUI extends Application {
 
-    private ComboBox<String> secondDropdown = null; // Reference for the second dropdown
-
     @Override
     public void start(Stage primaryStage) {
 
@@ -33,34 +31,6 @@ public class GUI extends Application {
         }
         selectDataDropdown.setValue("All Courses");
 
-        // Button to add a second dropdown
-        Button addDropdownButton = new Button("Add second course for Scatter Plot");
-        addDropdownButton.setStyle("-fx-font-size: 14px; -fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
-        addDropdownButton.setPrefSize(300, 30);
-
-        // VBox to hold the dropdowns
-        VBox dropdownContainer = new VBox(10);
-        dropdownContainer.setAlignment(Pos.CENTER);
-        dropdownContainer.getChildren().add(selectDataDropdown);
-        dropdownContainer.getChildren().add(addDropdownButton);
-
-        addDropdownButton.setOnAction(e -> {
-            if (secondDropdown == null) { // Add the second dropdown only if it doesn't exist
-                secondDropdown = new ComboBox<>();
-                secondDropdown.setPrefWidth(300);
-                secondDropdown.getItems().add("All Courses");
-                for (Course course : courses.getCurrentCourses()) {
-                    secondDropdown.getItems().add(course.getName());
-                }
-                secondDropdown.setValue("All Courses");
-
-                Label scatterLabel = new Label("Choose second course: ");
-                scatterLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-                dropdownContainer.getChildren().addAll(scatterLabel, secondDropdown);
-
-                dropdownContainer.getChildren().remove(addDropdownButton);
-            }
-        });
 
         // Dropdown for "Select X-Axis"
         Label selectXAxisLabel = new Label("Select X-Axis:");
@@ -105,38 +75,50 @@ public class GUI extends Application {
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
             String title = titleEntryField.getText(); // Get the title from the TextField
-            if (selectedCourse != null && selectedXAxis != null && !title.isEmpty()) {
-                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, title, selectedXAxis));
-            } else {
+            if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
+            } else {
+                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, title, selectedXAxis));
             }
         });
 
         // Box Plot
         Button boxPlotButton = createChartButton("Box Plot");
+        boxPlotButton.setOnAction(e -> {
+            String selectedXAxis = selectXAxisDropdown.getValue();
+            String selectedCourse = selectDataDropdown.getValue();
+            String title = titleEntryField.getText(); // Get the title from the TextField
+            if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
+                showAlert();
+            } else {
+                primaryStage.setScene(GraphManager.createBoxPlotScene(primaryStage, selectedCourse, title, selectedXAxis));
+            }
+        });
 
         // Scatter Plot
         Button scatterPlotButton = createChartButton("Scatter Plot");
         scatterPlotButton.setOnAction(e -> {
+            System.out.println("Scatter Plot button clicked");
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
-            String selected2ndCourse = secondDropdown.getValue();
             String title = titleEntryField.getText(); // Get the title from the TextField
-            if (selectedCourse != null && selectedXAxis != null && secondDropdown != null && !title.isEmpty()) {
-                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, selected2ndCourse, title, selectedXAxis));
-            } else {
+            if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
+            } else {
+                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, title, selectedXAxis));
             }
         });
 
+        // Pie chart
         Button pieChartButton = createChartButton("Pie Chart");
         pieChartButton.setOnAction(e -> {
+            String selectedXAxis = selectXAxisDropdown.getValue();
             String selectedCourse = selectDataDropdown.getValue();
             String title = titleEntryField.getText(); // Get the title from the TextField
-            if (selectedCourse != null && !title.isEmpty()) {
-                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse, title));
-            } else {
+            if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
+            } else {
+                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse, title, selectedXAxis));
             }
         });
 
@@ -159,7 +141,7 @@ public class GUI extends Application {
 
         layout.getChildren().addAll(
                 titleLabel,
-                selectDataLabel, dropdownContainer,
+                selectDataLabel, selectDataDropdown,
                 selectXAxisLabel, selectXAxisDropdown,
                 titleEntryLabel, titleEntryField,
                 filterLabel, filterGrid,
@@ -178,7 +160,7 @@ public class GUI extends Application {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Input Error");
         alert.setHeaderText(null);
-        alert.setContentText("Please select both a course and an X-Axis.");
+        alert.setContentText("Please select a course");
         alert.showAndWait();
     }
 

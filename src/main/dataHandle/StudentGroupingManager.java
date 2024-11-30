@@ -1,7 +1,11 @@
 package src.main.dataHandle;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class StudentGroupingManager {
 
@@ -13,98 +17,91 @@ public class StudentGroupingManager {
         this.currentStudentManager = currentStudentManager;
     }
 
-    public void displayPredictedGradesForGroupAndCourse(String attribute, String value, String courseName, CourseManager courseManager) {
-        // Load predicted grades temporarily
-        String[][] predictedGradesData = TwoDimensionalArray.readCsvInto2DArray("src/csvFiles/PredictedGradesDecisionStump.csv");
-        if (predictedGradesData == null || predictedGradesData.length == 0) {
-            System.out.println("Predicted grades file is empty or not found.");
-            return;
-        }
+    // Group grades by a specific attribute and calculate averages
+    public Map<String, Double> calculateAverageGradesByAttribute(Course course, String attribute) {
+        Map<String, List<Double>> groupedGrades = new HashMap<>();
 
-        // Get students grouped by the specified attribute and value
-        List<Integer> studentIDs = getStudentIDsByAttribute(attribute, value);
-
-        // Find the specific course
-        Course course = courseManager.getCourseByName(courseName);
-        if (course == null) {
-            System.out.println("Course not found: " + courseName);
-            return;
-        }
-
-        // Print grades for each student in the group
-        System.out.println("Predicted Grades for students with " + attribute + " = " + value + " in course " + courseName + ":");
-        for (Integer studentID : studentIDs) {
-            int rowIndex = findStudentRowIndex(predictedGradesData, studentID);
-            if (rowIndex != -1) {
-                String gradeStr = predictedGradesData[rowIndex][course.getColumnIndex() + 1]; // +1 to skip StudentID column
-                try {
-                    Double grade = Double.parseDouble(gradeStr.trim());
-                    System.out.println("StudentID: " + studentID + ", Grade: " + grade);
-                } catch (NumberFormatException e) {
-                    System.out.println("StudentID: " + studentID + ", Predicted Grade: No Grade");
-                }
-            } else {
-                System.out.println("StudentID: " + studentID + ", Predicted Grade: Not Found");
-            }
-        }
-    }
-
-    private List<Integer> getStudentIDsByAttribute(String attribute, String value) {
-        List<Integer> studentIDs = new ArrayList<>();
-
+        // Group grades by the specified attribute
         for (StudentInfoRecord student : studentInfoManager.getAllStudents()) {
-            if (getAttributeValue(student, attribute).equalsIgnoreCase(value)) {
-                studentIDs.add(student.getStudentID());
+            String groupValue = getAttributeValue(student, attribute); // Get group value (e.g., "Full", "High")
+            groupedGrades.computeIfAbsent(groupValue, k -> new ArrayList<>()); // Initialize group if not present
+
+            // Get grades for the student
+            CurrentStudentRecord studentRecord = currentStudentManager.getStudentRecord(student.getStudentID());
+            if (studentRecord != null) {
+                List<Double> grades = studentRecord.getCourseGrades();
+                if (course.getColumnIndex() < grades.size()) {
+                    Double grade = grades.get(course.getColumnIndex());
+                    if (grade != null) {
+                        groupedGrades.get(groupValue).add(grade);
+                    }
+                }
             }
         }
 
-        return studentIDs;
+        // Calculate average grades for each group
+        return groupedGrades.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Key: Group (e.g., "Full")
+                        entry -> calculateAverage(entry.getValue()) // Value: Average grade for the group
+                ));
     }
 
+    // Get attribute value dynamically
     private String getAttributeValue(StudentInfoRecord student, String attribute) {
         switch (attribute.toLowerCase()) {
-            case "neuro-synaptic interface level":
+            case "nsil":
                 return student.getNeuroSynapticInterfaceLevel();
-            case "plasma conductivity quotient":
-                return String.valueOf(student.getPlasmaConductivityQuotient());
-            case "chrono adaptation rate":
+            case "car":
                 return String.valueOf(student.getChronoAdaptationRate());
-            case "telepathic synchronisation index":
+            case "tsi":
                 return String.valueOf(student.getTelepathicSynchronisationIndex());
-            case "aetheric resonance capacity":
+            case "arc":
                 return String.valueOf(student.getAethericResonanceCapacity());
+            case "pcq":
+                return String.valueOf(student.getPlasmaConductivityQuotient());
             default:
-                throw new IllegalArgumentException("Invalid attribute: " + attribute);
+                return "Unknown";
         }
     }
 
-    private int findStudentRowIndex(String[][] data, int studentID) {
-        for (int i = 1; i < data.length; i++) { // Skip header row
-            if (Integer.parseInt(data[i][0].trim()) == studentID) {
-                return i;
+    public Map<String, List<Double>> groupGradesByAttribute(Course course, String attribute) {
+        Map<String, List<Double>> groupedGrades = new HashMap<>();
+
+        // Iterate through all students
+        for (StudentInfoRecord student : studentInfoManager.getAllStudents()) {
+            // Get the value of the specified attribute for the student
+            String groupValue = getAttributeValue(student, attribute);
+
+            // Initialize the group in the map if not present
+            groupedGrades.computeIfAbsent(groupValue, k -> new ArrayList<>());
+
+            // Get the student's grades
+            CurrentStudentRecord studentRecord = currentStudentManager.getStudentRecord(student.getStudentID());
+            if (studentRecord != null) {
+                List<Double> grades = studentRecord.getCourseGrades();
+                // Ensure the grade exists for the course and is not null
+                if (course.getColumnIndex() < grades.size()) {
+                    Double grade = grades.get(course.getColumnIndex());
+                    if (grade != null) {
+                        groupedGrades.get(groupValue).add(grade);
+                    }
+                }
             }
         }
-        return -1;
+
+        return groupedGrades;
     }
 
-    public static void main(String[] args) {
-        // Initialize managers
-        StudentInfoManager studentInfoManager = new StudentInfoManager();
-        CurrentStudentManager currentStudentManager = new CurrentStudentManager();
-        CourseManager courseManager = CourseManager.getInstance();
-
-        // Load predicted grades into course manager
-        courseManager.loadPredictedGrades(); // Ensure predicted grades are loaded
-
-        // Initialize grouping manager
-        StudentGroupingManager groupingManager = new StudentGroupingManager(studentInfoManager, currentStudentManager);
-
-        // Display predicted grades for students in a specific group and course
-        groupingManager.displayPredictedGradesForGroupAndCourse(
-                "Neuro-Synaptic Interface Level",
-                "Medium",
-                "Arkonian Warfare Tactics", // Replace with your course name
-                courseManager
-        );
+    // Calculate the average of a list of grades
+    private double calculateAverage(List<Double> grades) {
+        if (grades.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (Double grade : grades) {
+            sum += grade;
+        }
+        return sum / grades.size();
     }
 }
