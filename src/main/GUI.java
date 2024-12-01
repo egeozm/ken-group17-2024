@@ -11,11 +11,19 @@ import javafx.stage.Stage;
 import src.main.dataHandle.Course;
 import src.main.dataHandle.CourseManager;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class GUI extends Application {
+
+    private VBox filterColumn1;
+    private VBox filterColumn2;
+    private VBox filterColumn3;
+    private VBox filterColumn4;
+    private VBox filterColumn5;
 
     @Override
     public void start(Stage primaryStage) {
-
         // Title Label
         Label titleLabel = new Label("Data Dashboard");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
@@ -30,7 +38,6 @@ public class GUI extends Application {
             selectDataDropdown.getItems().add(course.getName());
         }
         selectDataDropdown.setValue("All Courses");
-
 
         // Dropdown for "Select X-Axis"
         Label selectXAxisLabel = new Label("Select X-Axis:");
@@ -48,20 +55,11 @@ public class GUI extends Application {
         // Filtering Options
         Label filterLabel = new Label("Filter Your Data:");
 
-        // Filter Column 1 (Checkboxes)
-        VBox filterColumn1 = createCheckboxColumn("NSIL:", new String[]{"Full", "High", "Medium", "Low", "Nothing"});
-
-        // Filter Column 2 (Checkboxes)
-        VBox filterColumn2 = createCheckboxColumn("CAR:", new String[]{"3 Tau", "2 Tau", "1 Tau"});
-
-        // Filter Column 3 (Checkboxes)
-        VBox filterColumn3 = createCheckboxColumn("TSI:", new String[]{"A", "B", "C", "D", "E", "F"});
-
-        // Filter Column 4 (Checkboxes)
-        VBox filterColumn4 = createCheckboxColumn("ARC:", new String[]{"5.0 HZ", "1.0 HZ", "0.5 HZ", "0.1 HZ"});
-
-        // Filter Column 5 (Min-Max Slider)
-        VBox filterColumn5 = createMinMaxColumn();
+        filterColumn1 = createCheckboxColumn("NSIL:", new String[]{"Full", "High", "Medium", "Low", "Nothing"});
+        filterColumn2 = createCheckboxColumn("CAR:", new String[]{"3 Tau", "2 Tau", "1 Tau"});
+        filterColumn3 = createCheckboxColumn("TSI:", new String[]{"A", "B", "C", "D", "E", "F"});
+        filterColumn4 = createCheckboxColumn("ARC:", new String[]{"5.0 HZ", "1.0 HZ", "0.5 HZ", "0.1 HZ"});
+        filterColumn5 = createMinMaxColumn();
 
         // Chart Buttons
         Label chartLabel = new Label("Select A Chart:");
@@ -69,56 +67,63 @@ public class GUI extends Application {
         chartButtons.setAlignment(Pos.CENTER);
         chartButtons.setPadding(new Insets(20));
 
-        // Bar Chart
+        // Bar Chart Button
         Button barChartButton = createChartButton("Bar Chart");
         barChartButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
-            String title = titleEntryField.getText(); // Get the title from the TextField
+            String title = titleEntryField.getText();
+            Map<String, List<String>> filters = getSelectedFilters();
+
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, title, selectedXAxis));
+                primaryStage.setScene(GraphManager.createBarChartScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
-        // Box Plot
+        // Box Plot Button
         Button boxPlotButton = createChartButton("Box Plot");
         boxPlotButton.setOnAction(e -> {
-            String selectedXAxis = selectXAxisDropdown.getValue();
             String selectedCourse = selectDataDropdown.getValue();
-            String title = titleEntryField.getText(); // Get the title from the TextField
+            String selectedXAxis = selectXAxisDropdown.getValue();
+            String title = titleEntryField.getText();
+            Map<String, List<String>> filters = getSelectedFilters();
+
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                primaryStage.setScene(GraphManager.createBoxPlotScene(primaryStage, selectedCourse, title, selectedXAxis));
+                 primaryStage.setScene(GraphManager.createBoxPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
-        // Scatter Plot
+        // Scatter Plot Button
         Button scatterPlotButton = createChartButton("Scatter Plot");
         scatterPlotButton.setOnAction(e -> {
-            System.out.println("Scatter Plot button clicked");
             String selectedCourse = selectDataDropdown.getValue();
             String selectedXAxis = selectXAxisDropdown.getValue();
-            String title = titleEntryField.getText(); // Get the title from the TextField
+            String title = titleEntryField.getText();
+            Map<String, List<String>> filters = getSelectedFilters();
+
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, title, selectedXAxis));
+                 primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
-        // Pie chart
+        // Pie Chart Button
         Button pieChartButton = createChartButton("Pie Chart");
         pieChartButton.setOnAction(e -> {
-            String selectedXAxis = selectXAxisDropdown.getValue();
             String selectedCourse = selectDataDropdown.getValue();
-            String title = titleEntryField.getText(); // Get the title from the TextField
+            String selectedXAxis = selectXAxisDropdown.getValue();
+            String title = titleEntryField.getText();
+            Map<String, List<String>> filters = getSelectedFilters();
+
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse, title, selectedXAxis));
+                primaryStage.setScene(GraphManager.createPieChartScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
@@ -148,23 +153,12 @@ public class GUI extends Application {
                 chartLabel, chartButtons
         );
 
-        // Set Scene and Show
-        Scene scene = new Scene(new ScrollPane(layout), 785, 835); // do not touch this
+        Scene scene = new Scene(new ScrollPane(layout), 785, 835);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Data Dashboard");
-        primaryStage.setResizable(true); // Allow resizing if needed
         primaryStage.show();
     }
 
-    private void showAlert() {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Input Error");
-        alert.setHeaderText(null);
-        alert.setContentText("Please select a course");
-        alert.showAndWait();
-    }
-
-    // Create a column of checkboxes for filtering
     private VBox createCheckboxColumn(String label, String[] options) {
         Label columnLabel = new Label(label);
         VBox column = new VBox(5);
@@ -176,7 +170,6 @@ public class GUI extends Application {
         return column;
     }
 
-    // Create a column with min-max controls for filtering
     private VBox createMinMaxColumn() {
         Label columnLabel = new Label("PCQ:");
         HBox minMaxControls = new HBox(5);
@@ -184,21 +177,72 @@ public class GUI extends Application {
         Spinner<Integer> minSpinner = new Spinner<>(-42, 134, -42);
         Label maxLabel = new Label("Max:");
         Spinner<Integer> maxSpinner = new Spinner<>(-42, 134, 134);
-
         minMaxControls.getChildren().addAll(minLabel, minSpinner, maxLabel, maxSpinner);
         return new VBox(5, columnLabel, minMaxControls);
     }
 
-    // Create a button for selecting a chart
     private Button createChartButton(String label) {
         Button button = new Button(label);
         button.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
-        button.setOnAction(e -> {
-            // Implement button actions here
-            System.out.println(label + " button clicked.");
-        });
         return button;
     }
+
+    private void showAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Input Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Please select a course");
+        alert.showAndWait();
+    }
+
+    private Map<String, List<String>> getSelectedFilters() {
+        Map<String, List<String>> filters = new HashMap<>();
+
+        // NSIL
+        List<String> nsilFilters = filterColumn1.getChildren().stream()
+                .filter(node -> node instanceof CheckBox && ((CheckBox) node).isSelected())
+                .map(node -> ((CheckBox) node).getText())
+                .collect(Collectors.toList());
+        if (!nsilFilters.isEmpty()) {
+            filters.put("NSIL", nsilFilters);
+        }
+
+        // CAR
+        List<String> carFilters = filterColumn2.getChildren().stream()
+                .filter(node -> node instanceof CheckBox && ((CheckBox) node).isSelected())
+                .map(node -> ((CheckBox) node).getText())
+                .collect(Collectors.toList());
+        if (!carFilters.isEmpty()) {
+            filters.put("CAR", carFilters);
+        }
+
+        // ARC
+        List<String> arcFilters = filterColumn4.getChildren().stream()
+                .filter(node -> node instanceof CheckBox && ((CheckBox) node).isSelected())
+                .map(node -> ((CheckBox) node).getText())
+                .collect(Collectors.toList());
+        if (!arcFilters.isEmpty()) {
+            filters.put("ARC", arcFilters);
+        }
+
+        // PCQ
+        Spinner<Integer> minSpinner = (Spinner<Integer>) ((HBox) filterColumn5.getChildren().get(1)).getChildren().get(1);
+        Spinner<Integer> maxSpinner = (Spinner<Integer>) ((HBox) filterColumn5.getChildren().get(1)).getChildren().get(3);
+        filters.put("PCQ", Arrays.asList(String.valueOf(minSpinner.getValue()), String.valueOf(maxSpinner.getValue())));
+
+        // TSI
+        List<String> tsiFilters = filterColumn3.getChildren().stream()
+                .filter(node -> node instanceof CheckBox && ((CheckBox) node).isSelected())
+                .map(node -> ((CheckBox) node).getText())
+                .collect(Collectors.toList());
+        if (!tsiFilters.isEmpty()) {
+            filters.put("TSI", tsiFilters);
+        }
+
+
+        return filters;
+    }
+
 
     // Create the Main Scene
     public static Scene createMainScene(Stage primaryStage) {
@@ -210,16 +254,16 @@ public class GUI extends Application {
         Button navigateButton = new Button("Go to Dashboard");
         Button exitButton = new Button("Exit");
         navigateButton.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
-        navigateButton.setOnAction(e -> new GUI().start(primaryStage));
-        exitButton.setOnAction(e -> System.exit(0));
+        navigateButton.setOnAction(e -> new GUI().start(primaryStage)); // Navigate to the main dashboard
+        exitButton.setOnAction(e -> System.exit(0)); // Exit the application
 
         // Layout
-        VBox layout = new VBox(10);
+        VBox layout = new VBox(10.0);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(20));
         layout.getChildren().addAll(titleLabel, navigateButton, exitButton);
 
-        return new Scene(layout, 400, 300);
+        return new Scene(layout, 900, 600);
     }
 
     public static void main(String[] args) {

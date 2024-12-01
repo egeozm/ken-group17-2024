@@ -1,14 +1,9 @@
 package src.main.dataHandle;
 
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.*;
 import java.util.stream.Collectors;
 
 public class StudentGroupingManager {
-
     private final StudentInfoManager studentInfoManager;
     private final PredictedCurrentStudentManager currentStudentManager;
 
@@ -17,91 +12,110 @@ public class StudentGroupingManager {
         this.currentStudentManager = currentStudentManager;
     }
 
-    // Group grades by a specific attribute and calculate averages
-    public Map<String, Double> calculateAverageGradesByAttribute(Course course, String attribute) {
-        Map<String, List<Double>> groupedGrades = new HashMap<>();
+    // Group and filter data dynamically based on user selection
+    public Map<String, Map<String, List<Double>>> groupAndFilterData(Course course, String selectedAxis, Map<String, List<String>> filters) {
+        Map<String, Map<String, List<Double>>> groupedData = new HashMap<>();
 
-        // Group grades by the specified attribute
         for (StudentInfoRecord student : studentInfoManager.getAllStudents()) {
-            String groupValue = getAttributeValue(student, attribute); // Get group value (e.g., "Full", "High")
-            groupedGrades.computeIfAbsent(groupValue, k -> new ArrayList<>()); // Initialize group if not present
+            String axisGroup = getAttributeValue(student, selectedAxis);
 
-            // Get grades for the student
+            if (!matchesFilters(student, filters)) {
+                continue; // Skip students not matching the filters
+            }
+
             CurrentStudentRecord studentRecord = currentStudentManager.getStudentRecord(student.getStudentID());
             if (studentRecord != null) {
                 List<Double> grades = studentRecord.getCourseGrades();
                 if (course.getColumnIndex() < grades.size()) {
                     Double grade = grades.get(course.getColumnIndex());
                     if (grade != null) {
-                        groupedGrades.get(groupValue).add(grade);
+                        groupedData.computeIfAbsent(axisGroup, k -> new HashMap<>());
+                        groupedData.get(axisGroup)
+                                .computeIfAbsent("Grades", k -> new ArrayList<>())
+                                .add(grade);
                     }
                 }
             }
         }
-
-        // Calculate average grades for each group
-        return groupedGrades.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey, // Key: Group (e.g., "Full")
-                        entry -> calculateAverage(entry.getValue()) // Value: Average grade for the group
-                ));
+        return groupedData;
     }
 
-    // Get attribute value dynamically
+
+    // Get attribute value dynamically based on selected axis
     private String getAttributeValue(StudentInfoRecord student, String attribute) {
         switch (attribute.toLowerCase()) {
             case "nsil":
-                return student.getNeuroSynapticInterfaceLevel();
+                return student.getNeuroSynapticInterfaceLevel(); // Ensure this method exists and works
             case "car":
-                return String.valueOf(student.getChronoAdaptationRate());
+                return String.valueOf(student.getChronoAdaptationRate()); // Ensure proper conversion
             case "tsi":
-                return String.valueOf(student.getTelepathicSynchronisationIndex());
+                return String.valueOf(student.getTelepathicSynchronisationIndex()); // Likely working
             case "arc":
-                return String.valueOf(student.getAethericResonanceCapacity());
+                return String.valueOf(student.getAethericResonanceCapacity()); // Ensure proper conversion
             case "pcq":
-                return String.valueOf(student.getPlasmaConductivityQuotient());
+                return String.valueOf(student.getPlasmaConductivityQuotient()); // Ensure proper conversion
             default:
-                return "Unknown";
+                return "Grades"; // Default case may cause issues
         }
     }
 
-    public Map<String, List<Double>> groupGradesByAttribute(Course course, String attribute) {
-        Map<String, List<Double>> groupedGrades = new HashMap<>();
 
-        // Iterate through all students
-        for (StudentInfoRecord student : studentInfoManager.getAllStudents()) {
-            // Get the value of the specified attribute for the student
-            String groupValue = getAttributeValue(student, attribute);
+    private boolean matchesFilters(StudentInfoRecord student, Map<String, List<String>> filters) {
+        for (Map.Entry<String, List<String>> filter : filters.entrySet()) {
+            String attribute = filter.getKey();
+            List<String> allowedValues = filter.getValue();
 
-            // Initialize the group in the map if not present
-            groupedGrades.computeIfAbsent(groupValue, k -> new ArrayList<>());
+            if (allowedValues == null || allowedValues.isEmpty()) {
+                continue; // Skip empty filters
+            }
 
-            // Get the student's grades
-            CurrentStudentRecord studentRecord = currentStudentManager.getStudentRecord(student.getStudentID());
-            if (studentRecord != null) {
-                List<Double> grades = studentRecord.getCourseGrades();
-                // Ensure the grade exists for the course and is not null
-                if (course.getColumnIndex() < grades.size()) {
-                    Double grade = grades.get(course.getColumnIndex());
-                    if (grade != null) {
-                        groupedGrades.get(groupValue).add(grade);
+            String studentValue = getAttributeValue(student, attribute);
+            if (studentValue == null) {
+                return false; // No value to compare
+            }
+
+            // Handle PCQ (range filter)
+            if (attribute.equalsIgnoreCase("PCQ")) {
+                try {
+                    double pcqValue = Double.parseDouble(studentValue);
+                    double minPCQ = Double.parseDouble(allowedValues.get(0));
+                    double maxPCQ = Double.parseDouble(allowedValues.get(1));
+                    if (pcqValue < minPCQ || pcqValue > maxPCQ) {
+                        return false;
                     }
+                } catch (NumberFormatException e) {
+                    return false; // Handle invalid numeric input
+                }
+            }
+            // Handle CAR (case-insensitive match for "tau")
+            else if (attribute.equalsIgnoreCase("CAR")) {
+                String normalizedStudentValue = studentValue.toLowerCase().replace(" tau", "").trim();
+                List<String> normalizedAllowedValues = allowedValues.stream()
+                        .map(value -> value.toLowerCase().replace(" tau", "").trim())
+                        .collect(Collectors.toList());
+                if (!normalizedAllowedValues.contains(normalizedStudentValue)) {
+                    return false;
+                }
+            }
+            // Handle ARC (case-insensitive match for "Hz")
+            else if (attribute.equalsIgnoreCase("ARC")) {
+                String normalizedStudentValue = studentValue.toLowerCase().replace(" hz", "").trim();
+                List<String> normalizedAllowedValues = allowedValues.stream()
+                        .map(value -> value.toLowerCase().replace(" hz", "").trim())
+                        .collect(Collectors.toList());
+                if (!normalizedAllowedValues.contains(normalizedStudentValue)) {
+                    return false;
+                }
+            }
+            // Handle other attributes (exact match, case-insensitive)
+            else {
+                if (allowedValues.stream().noneMatch(value -> value.equalsIgnoreCase(studentValue))) {
+                    return false; // No match for non-PCQ filters
                 }
             }
         }
-
-        return groupedGrades;
+        return true; // All filters matched
     }
 
-    // Calculate the average of a list of grades
-    private double calculateAverage(List<Double> grades) {
-        if (grades.isEmpty()) {
-            return 0.0;
-        }
-        double sum = 0.0;
-        for (Double grade : grades) {
-            sum += grade;
-        }
-        return sum / grades.size();
-    }
+
 }
