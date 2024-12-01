@@ -2,14 +2,12 @@ package src.main.predictGrades;
 
 import src.main.dataHandle.TwoDimensionalArray;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Predictor {
     public static ArrayList<Course> graduateCourses = new ArrayList<>();
     public static ArrayList<Course> currentCourses = new ArrayList<>();
+    public static ArrayList<Double> PCQValues = new ArrayList<>();
     public Predictor() {
         String graduateGradesFileName = "src/csvFiles/GraduateGrades.csv";
         String currentGradesFileName = "src/csvFiles/CurrentGrades.csv";
@@ -575,4 +573,16 @@ public class Predictor {
         return passRates;
     }
 
+    public ArrayList<Double> findPCQValues () {
+        TwoDimensionalArray fileLoader = new TwoDimensionalArray();
+        ArrayList<Double> PCQValues = new ArrayList<>();
+        String[][] studentInfo = fileLoader.readCsvInto2DArray("src/csvFiles/StudentInfo.csv");
+        for (int j = 1; j < studentInfo.length; j++) {
+            PCQValues.add(Double.parseDouble(studentInfo[j][2]));
+        }
+        Set<Double> uniqueSet = new LinkedHashSet<>(PCQValues);
+        ArrayList<Double> uniquePCQValues = new ArrayList<>(uniqueSet);
+        return uniquePCQValues;
+
+    }
 }
