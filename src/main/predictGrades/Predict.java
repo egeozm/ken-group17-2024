@@ -2,6 +2,8 @@ package src.main.predictGrades;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -219,7 +221,7 @@ public class Predict {
         return records;
     }
 
-    public static Scene visualizeDecisionTree(String courseName) {
+    public static Scene visualizeDecisionTree(String courseName, int studentId) {
         // Load data
         TwoDimensionalArray fileLoader = new TwoDimensionalArray();
         String[][] currentGrades = fileLoader.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
@@ -233,35 +235,132 @@ public class Predict {
         }
         int courseId = selectedCourse.getCourseID();
 
+        CurrentStudentAnalyzer currentStudentAnalyzer = new CurrentStudentAnalyzer(currentGrades, studentInfo);
+        CurrentStudent student = currentStudentAnalyzer.getCurrentStudentByID(studentId);
+        if (student == null) {
+            return null; // Handle invalid student ID
+        }
+
+        Record studentRecord = new Record(
+                student.getStudentID(),
+                0, // Placeholder for grade (as it's NG)
+                student.getNSI(),
+                student.getPCQ(),
+                student.getCAR(),
+                student.getTSI(),
+                student.getARC()
+        );
+
         ArrayList<Record> records = loadTrainingData(currentGrades, studentInfo, courseId);
         DecisionTree decisionTree = new DecisionTree();
         TreeNode root = decisionTree.buildTree(records, 6); // Depth adjustable
 
+        // Display student attributes
+        Label studentInfoLabel = new Label("Student Information:");
+        studentInfoLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        Label studentAttributes = new Label(
+                "TSI: " + student.getTSI() + "\n" +
+                        "NSI: " + student.getNSI() + "\n" +
+                        "PCQ: " + student.getPCQ() + "\n" +
+                        "CAR: " + student.getCAR() + "\n" +
+                        "ARC: " + student.getARC()
+        );
+        studentAttributes.setStyle("-fx-font-size: 12px;");
+
+        // Wrap student attributes in a VBox
+        VBox studentInfoBox = new VBox(studentInfoLabel, studentAttributes);
+        studentInfoBox.setSpacing(10); // Add spacing between elements
+        studentInfoBox.setPadding(new Insets(10)); // Add padding around the box
+
         // Generate JavaFX TreeView
         TreeItem<String> rootItem = new TreeItem<>("Decision Tree");
-        buildTreeVisualization(root, rootItem);
+        buildTreeVisualization(root, rootItem, studentRecord);
 
         TreeView<String> treeView = new TreeView<>(rootItem);
         treeView.setShowRoot(true);
 
-        VBox layout = new VBox(treeView);
-        layout.setPadding(new Insets(20));
-        return new Scene(layout, 600, 400);
+        // Add a ScrollPane for the tree view
+        ScrollPane scrollPane = new ScrollPane(treeView);
+        scrollPane.setFitToWidth(true); // Fit tree view to the width of the scroll pane
+
+        // Combine student info and tree view into a VBox
+        VBox layout = new VBox(studentInfoBox, scrollPane);
+        layout.setSpacing(20); // Add spacing between student info and tree view
+        layout.setPadding(new Insets(20)); // Add padding around the layout
+
+        // Set the scene size
+        return new Scene(layout, 500, 800); // Adjust height as needed
     }
 
+
     // Recursive method to build TreeView
-    private static void buildTreeVisualization(TreeNode node, TreeItem<String> treeItem) {
+    private static void buildTreeVisualization(TreeNode node, TreeItem<String> treeItem, Record student) {
         if (node.isLeaf()) {
-            treeItem.getChildren().add(new TreeItem<>("Leaf: " + node.getPredictedValue()));
+            treeItem.getChildren().add(new TreeItem<>("Leaf (Predicted Grade): " + node.getPredictedValue()));
         } else {
-            TreeItem<String> leftChild = new TreeItem<>("If " + node.getSplitProperty() + " <= " + node.getSplitPoint());
-            TreeItem<String> rightChild = new TreeItem<>("If " + node.getSplitProperty() + " > " + node.getSplitPoint());
+            String conditionLeft = "If " + node.getSplitProperty() + " <= " + node.getSplitPoint();
+            String conditionRight = "If " + node.getSplitProperty() + " > " + node.getSplitPoint();
+            TreeItem<String> leftChild = new TreeItem<>(conditionLeft);
+            TreeItem<String> rightChild = new TreeItem<>(conditionRight);
+
+            // Highlight the path for the student
+            if (studentMatchesCondition(node.getSplitProperty(), node.getSplitPoint(), student, true)) {
+                leftChild.setValue(conditionLeft + " (Path Taken)");
+            } else if (studentMatchesCondition(node.getSplitProperty(), node.getSplitPoint(), student, false)) {
+                rightChild.setValue(conditionRight + " (Path Taken)");
+            }
+
             treeItem.getChildren().add(leftChild);
             treeItem.getChildren().add(rightChild);
 
-            buildTreeVisualization(node.getLeft(), leftChild);
-            buildTreeVisualization(node.getRight(), rightChild);
+            buildTreeVisualization(node.getLeft(), leftChild, student);
+            buildTreeVisualization(node.getRight(), rightChild, student);
         }
     }
+
+    private static boolean studentMatchesCondition(String property, Object splitPoint, Record student, boolean isLeft) {
+        try {
+            switch (property) {
+                case "NSI":
+                case "TSI":
+                    // Handle String properties
+                    String stringValue = splitPoint.toString(); // Ensure splitPoint is treated as String
+                    if (isLeft) {
+                        return student.getNSI().equals(stringValue) || student.getTSI().equals(stringValue);
+                    } else {
+                        return !student.getNSI().equals(stringValue) && !student.getTSI().equals(stringValue);
+                    }
+                case "PCQ":
+                case "CAR":
+                case "ARC":
+                    // Handle numerical properties
+                    double numericValue = Double.parseDouble(splitPoint.toString()); // Convert splitPoint to double
+                    if (isLeft) {
+                        if (property.equals("PCQ")) {
+                            return student.getPCQ() <= numericValue;
+                        } else if (property.equals("CAR")) {
+                            return student.getCAR() <= numericValue;
+                        } else if (property.equals("ARC")) {
+                            return student.getARC() <= numericValue;
+                        }
+                    } else {
+                        if (property.equals("PCQ")) {
+                            return student.getPCQ() > numericValue;
+                        } else if (property.equals("CAR")) {
+                            return student.getCAR() > numericValue;
+                        } else if (property.equals("ARC")) {
+                            return student.getARC() > numericValue;
+                        }
+                    }
+                default:
+                    return false;
+            }
+        } catch (Exception e) {
+            System.err.println("Error in studentMatchesCondition: " + e.getMessage());
+            return false;
+        }
+    }
+
 
 }

@@ -154,13 +154,14 @@ public class GUI extends Application {
 
         visualizeTreeButton.setOnAction(e -> {
             String selectedCourse = selectDataDropdown.getValue();
+            int studentId = Integer.parseInt(studentIdField.getText()); // Input student ID
 
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlertForPrediction("Input Error", "Please select a specific course.");
             } else {
                 Stage treeStage = new Stage();
                 treeStage.setTitle("Decision Tree Visualization");
-                Scene treeScene = Predict.visualizeDecisionTree(selectedCourse);
+                Scene treeScene = Predict.visualizeDecisionTree(selectedCourse, studentId);
                 treeStage.setScene(treeScene);
                 treeStage.show();
             }
