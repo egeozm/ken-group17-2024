@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import src.main.dataHandle.Course;
 import src.main.dataHandle.CourseManager;
+import src.main.predictGrades.Predict;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,7 +94,7 @@ public class GUI extends Application {
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                 primaryStage.setScene(GraphManager.createBoxPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
+                primaryStage.setScene(GraphManager.createBoxPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
@@ -108,7 +109,7 @@ public class GUI extends Application {
             if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
                 showAlert();
             } else {
-                 primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
+                primaryStage.setScene(GraphManager.createScatterPlotScene(primaryStage, selectedCourse, title, selectedXAxis, filters));
             }
         });
 
@@ -128,6 +129,43 @@ public class GUI extends Application {
         });
 
         chartButtons.getChildren().addAll(barChartButton, boxPlotButton, scatterPlotButton, pieChartButton);
+
+        Label studentIdLabel = new Label("Enter Student ID:");
+        TextField studentIdField = new TextField();
+        studentIdField.setPromptText("Enter Student ID");
+
+        Button predictGradeButton = new Button("Predict Grade");
+        predictGradeButton.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        Button visualizeTreeButton = new Button("Visualize Decision Tree");
+        visualizeTreeButton.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        predictGradeButton.setOnAction(e -> {
+            String studentId = studentIdField.getText();
+            String selectedCourse = selectDataDropdown.getValue();
+
+            if (studentId.isEmpty() || selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
+                showAlertForPrediction("Input Error", "Please enter a valid Student ID and select a course.");
+            } else {
+                String result = Predict.getGradeForStudent(studentId, selectedCourse);
+                showAlertForPrediction("Prediction Result", result);
+            }
+        });
+
+        visualizeTreeButton.setOnAction(e -> {
+            String selectedCourse = selectDataDropdown.getValue();
+
+            if (selectedCourse == null || selectedCourse.equalsIgnoreCase("All Courses")) {
+                showAlertForPrediction("Input Error", "Please select a specific course.");
+            } else {
+                Stage treeStage = new Stage();
+                treeStage.setTitle("Decision Tree Visualization");
+                Scene treeScene = Predict.visualizeDecisionTree(selectedCourse);
+                treeStage.setScene(treeScene);
+                treeStage.show();
+            }
+        });
+
 
         // Main Layout
         VBox layout = new VBox(30);
@@ -150,7 +188,8 @@ public class GUI extends Application {
                 selectXAxisLabel, selectXAxisDropdown,
                 titleEntryLabel, titleEntryField,
                 filterLabel, filterGrid,
-                chartLabel, chartButtons
+                chartLabel, chartButtons, studentIdLabel, studentIdField, predictGradeButton,
+                visualizeTreeButton
         );
 
         Scene scene = new Scene(new ScrollPane(layout), 785, 835);
@@ -185,6 +224,14 @@ public class GUI extends Application {
         Button button = new Button(label);
         button.setStyle("-fx-background-color: #2a9d8f; -fx-text-fill: white; -fx-font-weight: bold;");
         return button;
+    }
+
+    private void showAlertForPrediction(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void showAlert() {

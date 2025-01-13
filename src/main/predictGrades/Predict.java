@@ -1,5 +1,10 @@
 package src.main.predictGrades;
 
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.layout.VBox;
 import src.main.dataHandle.TwoDimensionalArray;
 
 import java.util.ArrayList;
@@ -21,20 +26,19 @@ public class Predict {
         CurrentStudentAnalyzer currentStudentAnalyzer = new CurrentStudentAnalyzer(currentStudentData, studentInfo);
 
 
-
         ArrayList<Record> records = new ArrayList<>();
         int courseId = 1;
-        for (int i = 1; i < currentStudentData.length; i++){
-            if (!(currentStudentData[i][courseId].equals("NG"))){
+        for (int i = 1; i < currentStudentData.length; i++) {
+            if (!(currentStudentData[i][courseId].equals("NG"))) {
                 records.add(new Record(Integer.parseInt(currentStudentData[i][0]), Double.parseDouble(currentStudentData[i][courseId]),
-                        studentInfo[i][1], Integer.parseInt(studentInfo[i][2]), Integer.parseInt(studentInfo[i][3].substring(0,1)), studentInfo[i][4], Double.parseDouble(studentInfo[i][5].substring(0,3))));
+                        studentInfo[i][1], Integer.parseInt(studentInfo[i][2]), Integer.parseInt(studentInfo[i][3].substring(0, 1)), studentInfo[i][4], Double.parseDouble(studentInfo[i][5].substring(0, 3))));
             }
         }
 
         ArrayList<Record> trainingSet = new ArrayList<>();
         ArrayList<Record> testingSet = new ArrayList<>();
         List<ArrayList<Record>> shuffle = new ArrayList<>();
-        shuffle = splitData(records,0.8);
+        shuffle = splitData(records, 0.8);
         trainingSet = shuffle.get(0);
         testingSet = shuffle.get(1);
 
@@ -42,16 +46,16 @@ public class Predict {
 
         TreeNode d = decisionTree.buildTree(trainingSet, 6);
         ArrayList<Record> rec = new ArrayList<>();
-        for (int i = 1; i < currentStudentData.length; i++){
-            if (currentStudentData[i][courseId].equals("NG")){
-                rec.add(new Record(Integer.parseInt(currentStudentData[i][0]),0,
-                        studentInfo[i][1], Integer.parseInt(studentInfo[i][2]), Integer.parseInt(studentInfo[i][3].substring(0,1)), studentInfo[i][4], Double.parseDouble(studentInfo[i][5].substring(0,3))));
+        for (int i = 1; i < currentStudentData.length; i++) {
+            if (currentStudentData[i][courseId].equals("NG")) {
+                rec.add(new Record(Integer.parseInt(currentStudentData[i][0]), 0,
+                        studentInfo[i][1], Integer.parseInt(studentInfo[i][2]), Integer.parseInt(studentInfo[i][3].substring(0, 1)), studentInfo[i][4], Double.parseDouble(studentInfo[i][5].substring(0, 3))));
             }
         }
         ArrayList<Double> actualGrades = new ArrayList<>();
         ArrayList<Double> predictedGrades = new ArrayList<>();
-        for(Record r : testingSet){
-            double predicted = predictNG(d,r);
+        for (Record r : testingSet) {
+            double predicted = predictNG(d, r);
             System.out.println("ID: " + r.getId() + " => " + predicted + " | " + currentStudentAnalyzer.getCurrentStudentByID(r.getId()).getGrades().get(0));
 
             //for calculating the accuracy
@@ -59,7 +63,7 @@ public class Predict {
             actualGrades.add(currentStudentAnalyzer.getCurrentStudentByID(r.getId()).getGrades().get(0));
 
         }
-        System.out.println("Accuracy by MSE: " + calculateAccuracy(predictedGrades,actualGrades) + " Average error: " + Math.sqrt(calculateAccuracy(predictedGrades,actualGrades)));
+        System.out.println("Accuracy by MSE: " + calculateAccuracy(predictedGrades, actualGrades) + " Average error: " + Math.sqrt(calculateAccuracy(predictedGrades, actualGrades)));
     }
 
     public static double calculateAccuracy(ArrayList<Double> predicted, ArrayList<Double> actual) {
@@ -93,27 +97,27 @@ public class Predict {
         return result;
     }
 
-    public static double predictNG (TreeNode root, Record record){
+    public static double predictNG(TreeNode root, Record record) {
         TreeNode currentNode = root;
-        while (!currentNode.isLeaf()){
+        while (!currentNode.isLeaf()) {
             String splitProperty = currentNode.getSplitProperty();
             String splitPoint = currentNode.getSplitPoint().toString();
 
-            if (splitProperty.equals("NSI")){
+            if (splitProperty.equals("NSI")) {
                 String value = record.getNSI();
-                if (value.equals(splitPoint)){
+                if (value.equals(splitPoint)) {
                     currentNode = currentNode.getLeft();
-                }else {
+                } else {
                     currentNode = currentNode.getRight();
                 }
             } else if (splitProperty.equals("PCQ")) {
                 double value = record.getPCQ();
-                if (value <= Double.parseDouble(splitPoint)){
+                if (value <= Double.parseDouble(splitPoint)) {
                     currentNode = currentNode.getLeft();
-                }else {
+                } else {
                     currentNode = currentNode.getRight();
                 }
-            }else if (splitProperty.equals("CAR")) {
+            } else if (splitProperty.equals("CAR")) {
                 double value = record.getCAR();
                 if (value <= Double.parseDouble(splitPoint)) {
                     currentNode = currentNode.getLeft();
@@ -127,7 +131,7 @@ public class Predict {
                 } else {
                     currentNode = currentNode.getRight();
                 }
-            }else if (splitProperty.equals("ARC")) {
+            } else if (splitProperty.equals("ARC")) {
                 double value = record.getARC();
                 if (value <= Double.parseDouble(splitPoint)) {
                     currentNode = currentNode.getLeft();
@@ -140,10 +144,124 @@ public class Predict {
     }
 
 
-    public boolean isNumerical(String property){
-        if (property.equals("NSI") || property.equals("TSI")){
+    public boolean isNumerical(String property) {
+        if (property.equals("NSI") || property.equals("TSI")) {
             return false;
         }
         return true;
     }
+
+    public static String getGradeForStudent(String studentId, String courseName) {
+        // Load data
+        TwoDimensionalArray fileLoader = new TwoDimensionalArray();
+        String[][] currentGrades = fileLoader.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
+        String[][] studentInfo = fileLoader.readCsvInto2DArray("src/csvFiles/StudentInfo.csv");
+
+        // Retrieve course ID from CourseAnalyzer
+        CourseAnalyzer courseAnalyzer = new CourseAnalyzer(currentGrades, currentGrades[0]);
+        Course selectedCourse = courseAnalyzer.getCourseByName(courseName);
+        if (selectedCourse == null) {
+            return "Course not found.";
+        }
+        int courseId = selectedCourse.getCourseID();
+
+        // Locate student and check grade
+        for (String[] student : currentGrades) {
+            if (student[0].equals(studentId)) { // Student found
+                String grade = student[courseId + 1]; // Offset for header row
+
+                if (grade.equals("NG")) {
+                    // Build a record for the student
+                    CurrentStudentAnalyzer analyzer = new CurrentStudentAnalyzer(currentGrades, studentInfo);
+                    CurrentStudent studentData = analyzer.getCurrentStudentByID(Integer.parseInt(studentId));
+
+                    Record record = new Record(
+                            studentData.getStudentID(),
+                            0, // Placeholder for grade
+                            studentData.getNSI(),
+                            studentData.getPCQ(),
+                            studentData.getCAR(),
+                            studentData.getTSI(),
+                            studentData.getARC()
+                    );
+
+                    // Build decision tree and predict grade
+                    DecisionTree decisionTree = new DecisionTree();
+                    ArrayList<Record> records = loadTrainingData(currentGrades, studentInfo, courseId);
+                    TreeNode root = decisionTree.buildTree(records, 6); // Depth is adjustable
+                    double predictedGrade = Predict.predictNG(root, record);
+
+                    return "Predicted grade for " + courseName + ": " + predictedGrade;
+                } else {
+                    return "Student already has a grade for " + courseName + ": " + grade;
+                }
+            }
+        }
+        return "Student ID not found.";
+    }
+
+    // Helper method to load training data for a course
+    private static ArrayList<Record> loadTrainingData(String[][] gradesData, String[][] studentInfo, int courseId) {
+        ArrayList<Record> records = new ArrayList<>();
+        for (int i = 1; i < gradesData.length; i++) {
+            if (!gradesData[i][courseId + 1].equals("NG")) { // Only include known grades
+                records.add(new Record(
+                        Integer.parseInt(gradesData[i][0]),
+                        Double.parseDouble(gradesData[i][courseId + 1]),
+                        studentInfo[i][1], // NSI
+                        Integer.parseInt(studentInfo[i][2]), // PCQ
+                        Integer.parseInt(studentInfo[i][3].substring(0, 1)), // CAR
+                        studentInfo[i][4], // TSI
+                        Double.parseDouble(studentInfo[i][5].substring(0, 3)) // ARC
+                ));
+            }
+        }
+        return records;
+    }
+
+    public static Scene visualizeDecisionTree(String courseName) {
+        // Load data
+        TwoDimensionalArray fileLoader = new TwoDimensionalArray();
+        String[][] currentGrades = fileLoader.readCsvInto2DArray("src/csvFiles/CurrentGrades.csv");
+        String[][] studentInfo = fileLoader.readCsvInto2DArray("src/csvFiles/StudentInfo.csv");
+
+        // Retrieve course ID and build tree
+        CourseAnalyzer courseAnalyzer = new CourseAnalyzer(currentGrades, currentGrades[0]);
+        Course selectedCourse = courseAnalyzer.getCourseByName(courseName);
+        if (selectedCourse == null) {
+            return null;
+        }
+        int courseId = selectedCourse.getCourseID();
+
+        ArrayList<Record> records = loadTrainingData(currentGrades, studentInfo, courseId);
+        DecisionTree decisionTree = new DecisionTree();
+        TreeNode root = decisionTree.buildTree(records, 6); // Depth adjustable
+
+        // Generate JavaFX TreeView
+        TreeItem<String> rootItem = new TreeItem<>("Decision Tree");
+        buildTreeVisualization(root, rootItem);
+
+        TreeView<String> treeView = new TreeView<>(rootItem);
+        treeView.setShowRoot(true);
+
+        VBox layout = new VBox(treeView);
+        layout.setPadding(new Insets(20));
+        return new Scene(layout, 600, 400);
+    }
+
+    // Recursive method to build TreeView
+    private static void buildTreeVisualization(TreeNode node, TreeItem<String> treeItem) {
+        if (node.isLeaf()) {
+            treeItem.getChildren().add(new TreeItem<>("Leaf: " + node.getPredictedValue()));
+        } else {
+            TreeItem<String> leftChild = new TreeItem<>("If " + node.getSplitProperty() + " <= " + node.getSplitPoint());
+            TreeItem<String> rightChild = new TreeItem<>("If " + node.getSplitProperty() + " > " + node.getSplitPoint());
+            treeItem.getChildren().add(leftChild);
+            treeItem.getChildren().add(rightChild);
+
+            buildTreeVisualization(node.getLeft(), leftChild);
+            buildTreeVisualization(node.getRight(), rightChild);
+        }
+    }
+
 }
