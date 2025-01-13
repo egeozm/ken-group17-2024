@@ -116,12 +116,10 @@ public class Predictor {
             result.add(bestProperty);
             result.add(Double.toString(bestThreshold));
             result.add(Double.toString(maxVarianceReduction));
-            //  System.out.println("Best property for the course " + c.getCourseName() + ": " + bestProperty + " With the threshold: " + bestThreshold + " and variance reduction: " + maxVarianceReduction + ", total variance: " + calculateVariance(c.getGrades()));
+            // System.out.println("Best property for the course " + c.getCourseName() + ": " + bestProperty + " With the threshold: " + bestThreshold + " and variance reduction: " + maxVarianceReduction + ", total variance: " + calculateVariance(c.getGrades()));
         }
         return result; // returning a String ArrayList: {propertyName, boundary, varianceReduction}
     }
-
-
 
     // Finding the best threshold (boundary) for the given property => 3 different methods for double, int, string
     public ArrayList<String> findBestThresholdForInt(ArrayList<Integer> boundaries, ArrayList<Double> grades){
@@ -319,6 +317,8 @@ public class Predictor {
             row++;
         }
     }
+
+
 
     public void predictNGForestStump(){
         TwoDimensionalArray fileLoader = new TwoDimensionalArray();

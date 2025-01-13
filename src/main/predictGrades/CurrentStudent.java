@@ -87,7 +87,7 @@ public class CurrentStudent {
     }
 
     public int getStudentID() {
-        return 0;
+        return studentID;
     }
     public int getYearOfStudy() {
         return yearOfStudy;

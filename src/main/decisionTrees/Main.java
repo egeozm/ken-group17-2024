@@ -11,7 +11,7 @@ public class Main {
         double[][] features = DataLoader.loadFeaturesFromCsv(rawData);
         double[] targets = DataLoader.loadTargetFromCsv(rawData);
 
-        DecisionTree tree = new DecisionTree(3);
+        DecisionTrees tree = new DecisionTrees(3);
         tree.fit(features, targets);
 
         double[] newSample = {2, 1, 4};

@@ -2,14 +2,13 @@ package src.main.decisionTrees;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
-public class DecisionTree {
+public class DecisionTrees {
     private Node root;
     private int maxDepth;
 
-    public DecisionTree(int maxDepth) {
+    public DecisionTrees(int maxDepth) {
         this.maxDepth = maxDepth;
     }
 
@@ -102,7 +101,6 @@ public class DecisionTree {
                 }
             }
         }
-
         return bestSplit;
     }
 

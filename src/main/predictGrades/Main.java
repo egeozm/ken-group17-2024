@@ -76,6 +76,18 @@ public class Main {
 
 
     predictionAnalyzer.testGPA(14);
+        // Example usage
+        ArrayList<Double> exampleValues = new ArrayList<>();
+        exampleValues.add(8.0);
+        exampleValues.add(7.0);
+        exampleValues.add(6.0);
+        exampleValues.add(5.0);
+        exampleValues.add(4.0);
+
+        DecisionTree decisionTree = new DecisionTree();
+        double mse = decisionTree.calculateMSE(exampleValues);
+        System.out.println("MSE: " + mse); // Output the result
+
 
 
     }
