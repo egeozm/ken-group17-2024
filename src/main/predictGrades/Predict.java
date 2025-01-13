@@ -260,7 +260,8 @@ public class Predict {
         studentInfoLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         Label studentAttributes = new Label(
-                "TSI: " + student.getTSI() + "\n" +
+                "ID: " + student.getStudentID() + "\n" +
+                        "TSI: " + student.getTSI() + "\n" +
                         "NSI: " + student.getNSI() + "\n" +
                         "PCQ: " + student.getPCQ() + "\n" +
                         "CAR: " + student.getCAR() + "\n" +
