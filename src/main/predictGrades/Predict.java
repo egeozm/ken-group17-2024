@@ -253,7 +253,7 @@ public class Predict {
 
         ArrayList<Record> records = loadTrainingData(currentGrades, studentInfo, courseId);
         DecisionTree decisionTree = new DecisionTree();
-        TreeNode root = decisionTree.buildTree(records, 6); // Depth adjustable
+        TreeNode root = decisionTree.buildTree(records, 5); // Depth adjustable
 
         // Display student attributes
         Label studentInfoLabel = new Label("Student Information:");
