@@ -93,10 +93,10 @@ public class DecisionTree {
                         studentInfo[i][1], Integer.parseInt(studentInfo[i][2]), Integer.parseInt(studentInfo[i][3].substring(0,1)), studentInfo[i][4], Double.parseDouble(studentInfo[i][5].substring(0,3))));
             }
         }
-
-
         System.out.println(records.size());
     }
+
+
 
     public TreeNode buildTree(ArrayList<Record> data, int maxDepth){
         ArrayList<Double> grades = new ArrayList<>();
@@ -105,7 +105,7 @@ public class DecisionTree {
         }
 
         //Create a leaf node
-        if (maxDepth == 0 || isPure(grades)){
+        if (maxDepth == 0 || isPure(grades) || data.size() <= 8){
             double predictedValue = calculateMean(grades);
             return new TreeNode(predictedValue);
         }
@@ -215,7 +215,12 @@ public class DecisionTree {
         Collections.sort(sortedBoundaries);
         double bestThreshold = 0;
         double bestMseReduction = 0;
-        double mse = calculateMSE(grades);
+        double mse;
+        if (grades.size() == 0){
+            mse = 0;
+        } else {
+            mse = calculateMSE(grades);
+        }
         Set<Double> uniqueBoundariesSet = new HashSet<>(sortedBoundaries);
         ArrayList<Double> sortedUniqueBoundaries = new ArrayList<>(uniqueBoundariesSet);
         double leftMean = 0;
@@ -234,6 +239,11 @@ public class DecisionTree {
             }
             leftMean = calculateMean(leftGroup);
             rightMean = calculateMean(rightGroup);
+
+//            if (leftGroup.size() <=8 || rightGroup.size() <= 8){
+//                continue;
+//            }
+
             double weightedMSE = (calculateMSE(leftGroup) * leftGroup.size() + calculateMSE(rightGroup) * rightGroup.size()) / grades.size();
             double mseReduction = mse - weightedMSE;
             if (mseReduction > bestMseReduction){
@@ -255,7 +265,12 @@ public class DecisionTree {
         Collections.sort(sortedBoundaries);
         double bestThreshold = 0;
         double bestMseReduction = 0;
-        double mse = calculateMSE(grades);
+        double mse;
+        if (grades.size() == 0){
+            mse = 0;
+        } else {
+            mse = calculateMSE(grades);
+        }
         Set<Integer> uniqueBoundariesSet = new HashSet<>(sortedBoundaries);
         ArrayList<Integer> sortedUniqueBoundaries = new ArrayList<>(uniqueBoundariesSet);
         double leftMean = 0;
@@ -273,6 +288,11 @@ public class DecisionTree {
             }
             leftMean = calculateMean(leftGroup);
             rightMean = calculateMean(rightGroup);
+
+//            if (leftGroup.size() <=8 || rightGroup.size() <= 8){
+//                continue;
+//            }
+
             double weightedMSE = (calculateMSE(leftGroup) * leftGroup.size() + calculateMSE(rightGroup) * rightGroup.size()) / grades.size();
             double mseRediction = mse - weightedMSE;
             if (mseRediction > bestMseReduction){
@@ -292,7 +312,13 @@ public class DecisionTree {
         ArrayList<String> result = new ArrayList<>();
         Set<String> bounderiesSet = new HashSet<>(boundaries);
         ArrayList<String> uniqueBounderies = new ArrayList<>(bounderiesSet);
-        double mse = calculateMSE(grades);
+
+        double mse;
+        if (grades.size() == 0){
+            mse = 0;
+        } else {
+            mse = calculateMSE(grades);
+        }
         String bestSplit = null;
         double bestMseReduction = 0;
         double leftMean = 0;
@@ -312,6 +338,9 @@ public class DecisionTree {
             if (leftGroup.isEmpty() || rightGroup.isEmpty()){
                 continue;
             }
+//            if (leftGroup.size() <=8 || rightGroup.size() <= 8){
+//                continue;
+//            }
             double weightedMSE = (calculateMSE(leftGroup) * leftGroup.size() + calculateMSE(rightGroup) * rightGroup.size()) / grades.size();
             double mseReducion = mse - weightedMSE;
             if (mseReducion > bestMseReduction) {
